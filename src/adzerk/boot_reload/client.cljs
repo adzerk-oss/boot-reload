@@ -22,7 +22,7 @@
     (event/listen conn :message
       (fn [evt]
         (let [msg (reader/read-string (.-message evt))]
-          (when (set? msg) (rl/reload-css msg)))))
+          (when (set? msg) (rl/reload msg)))))
 
     (event/listen conn :closed
       (fn [evt]

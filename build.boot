@@ -1,13 +1,12 @@
 (set-env!
-  :dependencies '[[org.clojure/clojure       "1.6.0"      :scope "provided"]
-                  [boot/core                 "2.0.0-pre9" :scope "provided"]
-                  [org.clojure/clojurescript "0.0-2371"   :scope "provided"]
-                  [tailrecursion/boot-useful "0.1.3"      :scope "test"]
-                  [http-kit                  "2.1.18"     :scope "test"]])
+  :dependencies '[[org.clojure/clojure       "1.6.0"       :scope "provided"]
+                  [boot/core                 "2.0.0-pre11" :scope "provided"]
+                  [tailrecursion/boot-useful "0.1.3"       :scope "test"]
+                  [http-kit                  "2.1.18"      :scope "test"]])
 
 (require '[tailrecursion.boot-useful :refer :all])
 
-(def +version+ "0.1.0")
+(def +version+ "0.1.1")
 
 (useful! +version+)
 
