@@ -1,12 +1,11 @@
 (set-env!
   :dependencies '[[org.clojure/clojure       "1.6.0"       :scope "provided"]
-                  [boot/core                 "2.0.0-pre11" :scope "provided"]
                   [tailrecursion/boot-useful "0.1.3"       :scope "test"]
                   [http-kit                  "2.1.18"      :scope "test"]])
 
 (require '[tailrecursion.boot-useful :refer :all])
 
-(def +version+ "0.1.2")
+(def +version+ "0.1.3")
 
 (useful! +version+)
 
