@@ -4,14 +4,23 @@
    [adzerk.boot-reload.reload    :as rl]
    [clojure.browser.net          :as net]
    [clojure.browser.event        :as event]
-   [cljs.reader                  :as reader]))
+   [cljs.reader                  :as reader]
+   [goog.net.jsloader            :as jsloader]))
 
 (def ^:private ws-conn (atom nil))
 
 (defn alive? [] (not (nil? @ws-conn)))
 
+;; Thanks, lein-figwheel & lively!
+(defn patch-goog-base! []
+  (set! (.-provide js/goog) (.-exportPath_ js/goog))
+  (set! (.-CLOSURE_IMPORT_SCRIPT (.-global js/goog)) (fn [file]
+                                                       (when (.inHtmlDocument_ js/goog)
+                                                         (jsloader/load file)))))
+
 (defn connect [url]
   (let [conn (ws/websocket-connection)]
+    (patch-goog-base!)
     (reset! ws-conn conn)
 
     (event/listen conn :opened
