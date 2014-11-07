@@ -18,7 +18,7 @@
                                                        (when (.inHtmlDocument_ js/goog)
                                                          (jsloader/load file)))))
 
-(defn connect [url]
+(defn connect [url & [opts]]
   (let [conn (ws/websocket-connection)]
     (patch-goog-base!)
     (reset! ws-conn conn)
@@ -31,7 +31,7 @@
     (event/listen conn :message
       (fn [evt]
         (let [msg (reader/read-string (.-message evt))]
-          (when (set? msg) (rl/reload msg)))))
+          (when (set? msg) (rl/reload opts msg)))))
 
     (event/listen conn :closed
       (fn [evt]

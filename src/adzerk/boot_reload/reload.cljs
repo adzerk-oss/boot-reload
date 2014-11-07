@@ -33,7 +33,9 @@
         (when-let [href-uri (changed-href? (.-src image) changed)]
           (set! (.-src image) (.toString (.makeUnique href-uri))))))))
 
-(defn- reload-js [changed]
+(defn- reload-js [changed
+                  {:keys [on-jsload]
+                   :or {on-jsload identity}}]
   (let [js-files  (filter #(ends-with? % ".js") changed)
         deferreds (map (fn [f]
                          (-> f
@@ -44,11 +46,15 @@
     (-> deferreds
         clj->js
         deferred-list/gatherResults
-        (.addCallbacks (fn [& _] (.info js/console "All files ok"))
-                       (fn [& _] (.error js/console "Load failed"))))))
+        (.addCallbacks (fn [& _] (on-jsload))
+                       (fn [e] (.error js/console "Load failed:" (.-message e)))))))
 
 (defn- reload-html [changed]
   (when (changed-href? page-uri changed) (reload-page!)))
 
-(defn reload [changed]
-  (doto changed reload-js reload-html reload-css reload-img))
+(defn reload [opts changed]
+  (doto changed
+    (reload-js opts)
+    reload-html
+    reload-css
+    reload-img))
