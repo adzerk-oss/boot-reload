@@ -31,11 +31,15 @@
     (with-let [url (format "ws://%s:%d" host port)]
       (info "<< started reload server on %s >>\n" url))))
 
-(defn- write-cljs [f url]
+(defn- write-cljs [f url on-jsload]
   (->> (template
          ((ns adzerk.boot-reload
-            (:require [adzerk.boot-reload.client :as client]))
-          (when-not (client/alive?) (client/connect ~url))))
+            (:require
+             [adzerk.boot-reload.client :as client]
+             ~@(when on-jsload [(symbol (namespace on-jsload))])))
+          (when-not (client/alive?)
+            (client/connect ~url
+              ~(if-not on-jsload {} {:on-jsload on-jsload})))))
     (map pr-str) (interpose "\n") (apply str) (spit f)))
 
 (defn- send-changed! [pod changed]
@@ -48,12 +52,13 @@
   The default configuration starts a websocket server on a random available
   port on localhost."
 
-  [i ip ADDR   str "The IP address for the websocket server to listen on."
-   p port PORT int "The port the websocket server listens on."]
+  [i ip ADDR       str "The (optional) IP address for the websocket server to listen on."
+   p port PORT     int "The (optional) port the websocket server listens on."
+   j on-jsload SYM sym "The (optional) callback to call when JS files are reloaded."]
 
   (let [pod   (make-pod)
         out   (io/file (mksrcdir!) "adzerk" "boot_reload.cljs")]
     (io/make-parents out)
-    (write-cljs out (start-server @pod {:ip ip :port port}))
+    (write-cljs out (start-server @pod {:ip ip :port port}) on-jsload)
     (with-post-wrap (send-changed! @pod (changed)))))
 

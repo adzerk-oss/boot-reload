@@ -38,21 +38,24 @@
                    :or {on-jsload identity}}]
   (let [js-files (filter #(ends-with? % ".js") changed)]
     (if (seq js-files)
-      (-> (map (fn [f]
-                 (-> f
-                     guri/parse
-                     .makeUnique
-                     jsloader/load))
-               js-files)
-          clj->js
-          deferred-list/gatherResults
-          (.addCallbacks (fn [& _] (on-jsload))
-                         (fn [e] (.error js/console "Load failed:" (.-message e))))))))
+      (-> #(-> % guri/parse .makeUnique jsloader/load)
+        (map js-files)
+        clj->js
+        deferred-list/gatherResults
+        (.addCallbacks
+          (fn [& _] (on-jsload))
+          (fn [e] (.error js/console "Load failed:" (.-message e))))))))
 
 (defn- reload-html [changed]
   (when (changed-href? page-uri changed) (reload-page!)))
 
+(defn- group-log [title things-to-log]
+  (.groupCollapsed js/console title)
+  (doseq [t things-to-log] (.log js/console t))
+  (.groupEnd js/console))
+
 (defn reload [opts changed]
+  (group-log "Reload" changed)
   (doto changed
     (reload-js opts)
     reload-html
