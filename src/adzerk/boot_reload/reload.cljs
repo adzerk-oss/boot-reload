@@ -1,7 +1,9 @@
 (ns adzerk.boot-reload.reload
   (:require
-   [clojure.string :as string]
-   [goog.Uri       :as guri]))
+   [clojure.string          :as string]
+   [goog.Uri                :as guri]
+   [goog.async.DeferredList :as deferred-list]
+   [goog.net.jsloader       :as jsloader]))
 
 (def ^:private page-uri (goog.Uri. (.. js/window -location -href)))
 
@@ -31,11 +33,28 @@
         (when-let [href-uri (changed-href? (.-src image) changed)]
           (set! (.-src image) (.toString (.makeUnique href-uri))))))))
 
-(defn- reload-js [changed]
-  (when (some #(ends-with? % ".js") changed) (reload-page!)))
+(defn- reload-js [changed
+                  {:keys [on-jsload]
+                   :or {on-jsload identity}}]
+  (let [js-files (filter #(ends-with? % ".js") changed)]
+    (if (seq js-files)
+      (-> (map (fn [f]
+                 (-> f
+                     guri/parse
+                     .makeUnique
+                     jsloader/load))
+               js-files)
+          clj->js
+          deferred-list/gatherResults
+          (.addCallbacks (fn [& _] (on-jsload))
+                         (fn [e] (.error js/console "Load failed:" (.-message e))))))))
 
 (defn- reload-html [changed]
   (when (changed-href? page-uri changed) (reload-page!)))
 
-(defn reload [changed]
-  (doto changed reload-js reload-html reload-css reload-img))
+(defn reload [opts changed]
+  (doto changed
+    (reload-js opts)
+    reload-html
+    reload-css
+    reload-img))
