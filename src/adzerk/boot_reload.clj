@@ -39,7 +39,7 @@
              ~@(when on-jsload [(symbol (namespace on-jsload))])))
           (when-not (client/alive?)
             (client/connect ~url
-              {:on-jsload #(~(or on-jsload 'identity))}))))
+              {:on-jsload #(~(or on-jsload '+))}))))
     (map pr-str) (interpose "\n") (apply str) (spit f)))
 
 (defn- send-changed! [pod changed]
