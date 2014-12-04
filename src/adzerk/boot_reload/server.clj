@@ -35,5 +35,5 @@
 
 (defn start
   [{:keys [ip port] :as opts}]
-  (let [o {:ip (or ip "0.0.0.0" :port (or port 0))}]
+  (let [o {:ip (or ip "0.0.0.0") :port (or port 0)}]
     (assoc o :port (-> (http/run-server handler o) meta :local-port))))
