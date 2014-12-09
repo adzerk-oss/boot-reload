@@ -7,13 +7,17 @@
 
 (def ^:private page-uri (goog.Uri. (.. js/window -location -href)))
 
+(defn- substring? [s subs]
+  (pos? (.lastIndexOf s subs)))
+
 (defn- reload-page! []
   (.reload (.-location js/window)))
 
 (defn- changed-href? [href-or-uri changed]
   (when href-or-uri
-    (let [uri (goog.Uri. href-or-uri)]
-      (when (contains? changed (.getPath (.resolve page-uri uri)))
+    (let [uri  (goog.Uri. href-or-uri)
+          path (.getPath (.resolve page-uri uri))]
+      (when (not-empty (filter #(substring? % path) changed))
         uri))))
 
 (defn- ends-with? [s pat]
@@ -33,9 +37,8 @@
         (when-let [href-uri (changed-href? (.-src image) changed)]
           (set! (.-src image) (.toString (.makeUnique href-uri))))))))
 
-(defn- reload-js [changed
-                  {:keys [on-jsload]
-                   :or {on-jsload identity}}]
+(defn- reload-js [changed {:keys [on-jsload]
+                           :or {on-jsload identity}}]
   (let [js-files (filter #(ends-with? % ".js") changed)]
     (if (seq js-files)
       (-> #(-> % guri/parse .makeUnique jsloader/load)
