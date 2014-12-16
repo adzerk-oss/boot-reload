@@ -55,7 +55,10 @@
         prev (atom nil)
         out  (doto (io/file tmp "adzerk" "boot_reload.cljs") io/make-parents)]
     (write-cljs! out (start-server @pod {:ip ip :port port}) on-jsload)
-    (with-post-wrap fileset
-      (send-changed! @pod (changed @prev fileset))
-      (reset! prev fileset))))
+    (comp
+     (with-pre-wrap fileset
+       (-> fileset (add-resource tmp) commit!))
+     (with-post-wrap fileset
+       (send-changed! @pod (changed @prev fileset))
+       (reset! prev fileset)))))
 
