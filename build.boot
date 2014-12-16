@@ -1,19 +1,19 @@
 (set-env!
-  :dependencies '[[org.clojure/clojure       "1.6.0"       :scope "provided"]
-                  [tailrecursion/boot-useful "0.1.3"       :scope "test"]
-                  [http-kit                  "2.1.18"      :scope "test"]])
+  :dependencies '[[org.clojure/clojure "1.6.0"  :scope "provided"]
+                  [adzerk/bootlaces    "0.1.5"  :scope "test"]
+                  [http-kit            "2.1.18" :scope "test"]])
 
-(require '[tailrecursion.boot-useful :refer :all])
+(require '[adzerk.bootlaces :refer :all])
 
 (def +version+ "0.1.8")
 
-(useful! +version+)
+(bootlaces! +version+)
 
 (task-options!
-  pom  [:project     'adzerk/boot-reload
-        :version     +version+
-        :description "Boot task to automatically reload page resources in the browser."
-        :url         "https://github.com/adzerk/boot-reload"
-        :scm         {:url "https://github.com/adzerk/boot-reload"}
-        :license     {:name "Eclipse Public License"
-                      :url  "http://www.eclipse.org/legal/epl-v10.html"}])
+  pom {:project     'adzerk/boot-reload
+       :version     +version+
+       :description "Boot task to automatically reload page resources in the browser."
+       :url         "https://github.com/adzerk/boot-reload"
+       :scm         {:url "https://github.com/adzerk/boot-reload"}
+       :license     {:name "Eclipse Public License"
+                     :url  "http://www.eclipse.org/legal/epl-v10.html"}})
