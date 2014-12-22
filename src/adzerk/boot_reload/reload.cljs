@@ -7,8 +7,8 @@
 
 (def ^:private page-uri (goog.Uri. (.. js/window -location -href)))
 
-(defn- substring? [s subs]
-  (pos? (.lastIndexOf s subs)))
+(defn- ends-with? [s pat]
+  (= pat (subs s (- (count s) (count pat)))))
 
 (defn- reload-page! []
   (.reload (.-location js/window)))
@@ -17,11 +17,8 @@
   (when href-or-uri
     (let [uri  (goog.Uri. href-or-uri)
           path (.getPath (.resolve page-uri uri))]
-      (when (not-empty (filter #(substring? % path) changed))
+      (when (not-empty (filter #(ends-with? % path) changed))
         uri))))
-
-(defn- ends-with? [s pat]
-  (= pat (subs s (- (count s) (count pat)))))
 
 (defn- reload-css [changed]
   (let [sheets (.. js/document -styleSheets)]
@@ -50,7 +47,11 @@
           (fn [e] (.error js/console "Load failed:" (.-message e))))))))
 
 (defn- reload-html [changed]
-  (when (changed-href? page-uri changed) (reload-page!)))
+  (let [page-path (.getPath page-uri)
+        html-path (if (ends-with? page-path "/")
+                    (str page-path "index.html")
+                    page-path)]
+    (when (changed-href? html-path changed) (reload-page!))))
 
 (defn- group-log [title things-to-log]
   (.groupCollapsed js/console title)
