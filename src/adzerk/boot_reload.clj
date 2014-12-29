@@ -31,14 +31,27 @@
             (:require
              [adzerk.boot-reload.client :as client]
              ~@(when on-jsload [(symbol (namespace on-jsload))])))
-          (when-not (client/alive?)
-            (client/connect ~url
-              {:on-jsload #(~(or on-jsload '+))}))))
+          (def init*
+            (delay
+              (when-not (client/alive?)
+                (client/connect ~url
+                                {:on-jsload #(~(or on-jsload '+))}))))
+          (defn init! [] @init*)
+          @init*))
     (map pr-str) (interpose "\n") (apply str) (spit f)))
 
 (defn- send-changed! [pod changed]
   (pod/with-call-in pod
     (adzerk.boot-reload.server/send-changed! ~(get-env :target-path) ~changed)))
+
+(defn- add-init!
+  [in-file out-file]
+  (-> in-file
+      slurp
+      read-string
+      (update-in [:init-fns] conj 'adzerk.boot-reload/init!)
+      pr-str
+      ((partial spit out-file))))
 
 (deftask reload
   "Live reload of page resources in browser via websocket.
@@ -56,9 +69,14 @@
         out  (doto (io/file tmp "adzerk" "boot_reload.cljs") io/make-parents)]
     (write-cljs! out (start-server @pod {:ip ip :port port}) on-jsload)
     (comp
-     (with-pre-wrap fileset
-       (-> fileset (add-resource tmp) commit!))
-     (with-post-wrap fileset
-       (send-changed! @pod (changed @prev fileset))
-       (reset! prev fileset)))))
+      (with-pre-wrap fileset
+        (doseq [f (->> fileset input-files (by-ext [".main.edn"]))]
+          (let [path     (tmppath f)
+                in-file  (tmpfile f)
+                out-file (io/file tmp path)]
+            (add-init! in-file out-file)))
+        (-> fileset (add-resource tmp) commit!))
+      (with-post-wrap fileset
+        (send-changed! @pod (changed @prev fileset))
+        (reset! prev fileset)))))
 
