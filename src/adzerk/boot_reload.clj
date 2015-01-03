@@ -16,7 +16,7 @@
 
 (defn- changed [before after]
   (when before
-    (->> (fileset-diff before after) output-files (map tmppath) set)))
+    (->> (fileset-diff before after :hash) output-files (map tmppath) set)))
 
 (defn- start-server [pod {:keys [ip port] :as opts}]
   (let [{:keys [ip port]}
@@ -31,13 +31,8 @@
             (:require
              [adzerk.boot-reload.client :as client]
              ~@(when on-jsload [(symbol (namespace on-jsload))])))
-          (def init*
-            (delay
-              (when-not (client/alive?)
-                (client/connect ~url
-                                {:on-jsload #(~(or on-jsload '+))}))))
-          (defn init! [] @init*)
-          @init*))
+          (when-not (client/alive?)
+            (client/connect ~url {:on-jsload #(~(or on-jsload '+))}))))
     (map pr-str) (interpose "\n") (apply str) (spit f)))
 
 (defn- send-changed! [pod changed]
@@ -49,7 +44,7 @@
   (-> in-file
       slurp
       read-string
-      (update-in [:init-fns] conj 'adzerk.boot-reload/init!)
+      (update-in [:require] conj 'adzerk.boot-reload)
       pr-str
       ((partial spit out-file))))
 
