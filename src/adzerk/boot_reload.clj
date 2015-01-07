@@ -16,7 +16,10 @@
 
 (defn- changed [before after]
   (when before
-    (->> (fileset-diff before after :hash) output-files (map tmppath) set)))
+    (->> (fileset-diff before after :hash)
+         output-files
+         (sort-by :dependency-order)
+         (map tmppath))))
 
 (defn- start-server [pod {:keys [ip port] :as opts}]
   (let [{:keys [ip port]}
@@ -36,8 +39,9 @@
     (map pr-str) (interpose "\n") (apply str) (spit f)))
 
 (defn- send-changed! [pod changed]
-  (pod/with-call-in pod
-    (adzerk.boot-reload.server/send-changed! ~(get-env :target-path) ~changed)))
+  (when-not (empty? changed)
+    (pod/with-call-in pod
+      (adzerk.boot-reload.server/send-changed! ~(get-env :target-path) ~changed))))
 
 (defn- add-init!
   [in-file out-file]

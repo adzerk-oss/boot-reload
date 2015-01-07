@@ -31,7 +31,7 @@
     (event/listen conn :message
       (fn [evt]
         (let [msg (reader/read-string (.-message evt))]
-          (when (set? msg) (rl/reload opts msg)))))
+          (when (vector? msg) (rl/reload opts msg)))))
 
     (event/listen conn :closed
       (fn [evt]

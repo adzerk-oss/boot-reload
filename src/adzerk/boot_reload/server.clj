@@ -16,7 +16,7 @@
 (defn send-changed! [tgt-path changed]
   (doseq [[id {:keys [proto channel]}] @state]
     (http/send! channel
-      (pr-str (into #{} (map #(web-path proto % tgt-path) changed))))))
+      (pr-str (into [] (map #(web-path proto % tgt-path) changed))))))
 
 (defn set-proto! [channel proto]
   (doseq [[id {c :channel}] @state]
