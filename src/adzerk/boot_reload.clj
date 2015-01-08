@@ -29,6 +29,7 @@
       (info "<< started reload server on %s >>\n" url))))
 
 (defn- write-cljs! [f url on-jsload]
+  (info "Writing %s...\n" (.getName f))
   (->> (template
          ((ns adzerk.boot-reload
             (:require
@@ -45,12 +46,14 @@
 
 (defn- add-init!
   [in-file out-file]
-  (-> in-file
-      slurp
-      read-string
-      (update-in [:require] conj 'adzerk.boot-reload)
-      pr-str
-      ((partial spit out-file))))
+  (let [ns 'adzerk.boot-reload]
+    (info "Adding :require %s to %s...\n" ns (.getName in-file))
+    (-> in-file
+        slurp
+        read-string
+        (update-in [:require] conj ns)
+        pr-str
+        ((partial spit out-file)))))
 
 (deftask reload
   "Live reload of page resources in browser via websocket.
@@ -63,9 +66,11 @@
    j on-jsload SYM sym "The (optional) callback to call when JS files are reloaded."]
 
   (let [pod  (make-pod)
+        src  (temp-dir!)
         tmp  (temp-dir!)
         prev (atom nil)
-        out  (doto (io/file tmp "adzerk" "boot_reload.cljs") io/make-parents)]
+        out  (doto (io/file src "adzerk" "boot_reload.cljs") io/make-parents)]
+    (set-env! :source-paths #(conj % (.getPath src)))
     (write-cljs! out (start-server @pod {:ip ip :port port}) on-jsload)
     (comp
       (with-pre-wrap fileset
