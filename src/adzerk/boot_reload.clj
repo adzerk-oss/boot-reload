@@ -74,7 +74,7 @@
     (write-cljs! out (start-server @pod {:ip ip :port port}) on-jsload)
     (comp
       (with-pre-wrap fileset
-        (doseq [f (->> fileset input-files (by-ext [".main.edn"]))]
+        (doseq [f (->> fileset input-files (by-ext [".cljs.edn"]))]
           (let [path     (tmppath f)
                 in-file  (tmpfile f)
                 out-file (io/file tmp path)]
