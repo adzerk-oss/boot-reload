@@ -16,5 +16,5 @@
        :description "Boot task to automatically reload page resources in the browser."
        :url         "https://github.com/adzerk/boot-reload"
        :scm         {:url "https://github.com/adzerk/boot-reload"}
-       :license     {:name "Eclipse Public License"
-                     :url  "http://www.eclipse.org/legal/epl-v10.html"}})
+       :license     {"Eclipse Public License"
+                     "http://www.eclipse.org/legal/epl-v10.html"}})
