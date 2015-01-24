@@ -46,14 +46,15 @@
 
 (defn- add-init!
   [in-file out-file]
-  (let [ns 'adzerk.boot-reload]
-    (info "Adding :require %s to %s...\n" ns (.getName in-file))
-    (-> in-file
-        slurp
-        read-string
+  (let [ns 'adzerk.boot-reload
+        spec (-> in-file slurp read-string)]
+    (when (not= :nodejs (-> spec :compiler-options :target))
+      (info "Adding :require %s to %s...\n" ns (.getName in-file))
+      (io/make-parents out-file)
+      (-> spec
         (update-in [:require] conj ns)
         pr-str
-        ((partial spit out-file)))))
+        ((partial spit out-file))))))
 
 (deftask reload
   "Live reload of page resources in browser via websocket.
@@ -74,7 +75,7 @@
     (write-cljs! out (start-server @pod {:ip ip :port port}) on-jsload)
     (comp
       (with-pre-wrap fileset
-        (doseq [f (->> fileset input-files (by-ext [".main.edn"]))]
+        (doseq [f (->> fileset input-files (by-ext [".cljs.edn"]))]
           (let [path     (tmppath f)
                 in-file  (tmpfile f)
                 out-file (io/file tmp path)]
