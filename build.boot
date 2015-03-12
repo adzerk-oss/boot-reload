@@ -1,7 +1,7 @@
 (set-env!
  :dependencies '[[org.clojure/clojure "1.6.0"     :scope "provided"]
                  [boot/core           "2.0.0-rc1" :scope "provided"]
-                 [adzerk/bootlaces    "0.1.5"     :scope "test"]
+                 [adzerk/bootlaces    "0.1.10"    :scope "test"]
                  [http-kit            "2.1.18"    :scope "test"]])
 
 (require '[adzerk.bootlaces :refer :all])
