@@ -44,7 +44,9 @@
         deferred-list/gatherResults
         (.addCallbacks
           (fn [& _] (on-jsload))
-          (fn [e] (.error js/console "Load failed:" (.-message e))))))))
+          (fn [e] (.error js/console "Load failed:" (.-message e)))))
+      (when (aget js/window "jQuery")
+        (.trigger (js/jQuery js/document) "page-load")))))
 
 (defn- reload-html [changed]
   (let [page-path (.getPath page-uri)
