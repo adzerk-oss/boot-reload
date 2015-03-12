@@ -37,7 +37,7 @@
 (defn- reload-js [changed {:keys [on-jsload]
                            :or {on-jsload identity}}]
   (let [js-files (filter #(ends-with? % ".js") changed)]
-    (if (seq js-files)
+    (when (seq js-files)
       (-> #(-> % guri/parse .makeUnique jsloader/load)
         (map js-files)
         clj->js
