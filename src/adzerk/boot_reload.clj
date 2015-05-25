@@ -19,7 +19,7 @@
     (->> (fileset-diff before after :hash)
          output-files
          (sort-by :dependency-order)
-         (map tmppath))))
+         (map tmp-path))))
 
 (defn- start-server [pod {:keys [ip port] :as opts}]
   (let [{:keys [ip port]}
@@ -67,8 +67,8 @@
    j on-jsload SYM sym "The (optional) callback to call when JS files are reloaded."]
 
   (let [pod  (make-pod)
-        src  (temp-dir!)
-        tmp  (temp-dir!)
+        src  (tmp-dir!)
+        tmp  (tmp-dir!)
         prev (atom nil)
         out  (doto (io/file src "adzerk" "boot_reload.cljs") io/make-parents)]
     (set-env! :source-paths #(conj % (.getPath src)))
@@ -76,8 +76,8 @@
     (comp
       (with-pre-wrap fileset
         (doseq [f (->> fileset input-files (by-ext [".cljs.edn"]))]
-          (let [path     (tmppath f)
-                in-file  (tmpfile f)
+          (let [path     (tmp-path f)
+                in-file  (tmp-file f)
                 out-file (io/file tmp path)]
             (add-init! in-file out-file)))
         (-> fileset (add-resource tmp) commit!))
