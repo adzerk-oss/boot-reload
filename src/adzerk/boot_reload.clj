@@ -62,9 +62,12 @@
   The default configuration starts a websocket server on a random available
   port on localhost."
 
-  [i ip ADDR       str "The (optional) IP address for the websocket server to listen on."
-   p port PORT     int "The (optional) port the websocket server listens on."
-   j on-jsload SYM sym "The (optional) callback to call when JS files are reloaded."]
+  [i ip          ADDR    str  "The (optional) IP address for the websocket server to listen on."
+   p port        PORT    int  "The (optional) port the websocket server listens on."
+   j on-jsload   SYM     sym  "The (optional) callback to call when JS files are reloaded."
+   x proxy       PROXY   str  "The (optional) URL the client should connect to, when different
+                               from the server URL. Ex: when app under development is behind
+                               proxy server serving https/wss."]
 
   (let [pod  (make-pod)
         src  (tmp-dir!)
@@ -72,7 +75,6 @@
         prev (atom nil)
         out  (doto (io/file src "adzerk" "boot_reload.cljs") io/make-parents)]
     (set-env! :source-paths #(conj % (.getPath src)))
-    (write-cljs! out (start-server @pod {:ip ip :port port}) on-jsload)
     (comp
       (with-pre-wrap fileset
         (doseq [f (->> fileset input-files (by-ext [".cljs.edn"]))]
@@ -84,4 +86,8 @@
       (with-post-wrap fileset
         (send-changed! @pod (changed @prev fileset))
         (reset! prev fileset)))))
+       (set-env! :source-paths #(conj % (.getPath src)))
+       (let [server-url (start-server @pod {:ip ip :port port})]
+            (write-cljs! out (or proxy server-url) on-jsload))
+
 
