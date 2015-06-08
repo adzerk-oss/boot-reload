@@ -57,37 +57,37 @@
         ((partial spit out-file))))))
 
 (deftask reload
-  "Live reload of page resources in browser via websocket.
+         "Live reload of page resources in browser via websocket.
 
-  The default configuration starts a websocket server on a random available
-  port on localhost."
+         The default configuration starts a websocket server on a random available
+         port on localhost."
 
-  [i ip          ADDR    str  "The (optional) IP address for the websocket server to listen on."
-   p port        PORT    int  "The (optional) port the websocket server listens on."
-   j on-jsload   SYM     sym  "The (optional) callback to call when JS files are reloaded."
-   x proxy       PROXY   str  "The (optional) URL the client should connect to, when different
+         [i ip ADDR str "The (optional) IP address for the websocket server to listen on."
+          p port PORT int "The (optional) port the websocket server listens on."
+          j on-jsload SYM sym "The (optional) callback to call when JS files are reloaded."
+          x proxy PROXY str "The (optional) URL the client should connect to, when different
                                from the server URL. Ex: when app under development is behind
                                proxy server serving https/wss."]
 
-  (let [pod  (make-pod)
-        src  (tmp-dir!)
-        tmp  (tmp-dir!)
-        prev (atom nil)
-        out  (doto (io/file src "adzerk" "boot_reload.cljs") io/make-parents)]
-    (set-env! :source-paths #(conj % (.getPath src)))
-    (comp
-      (with-pre-wrap fileset
-        (doseq [f (->> fileset input-files (by-ext [".cljs.edn"]))]
-          (let [path     (tmp-path f)
-                in-file  (tmp-file f)
-                out-file (io/file tmp path)]
-            (add-init! in-file out-file)))
-        (-> fileset (add-resource tmp) commit!))
-      (with-post-wrap fileset
-        (send-changed! @pod (changed @prev fileset))
-        (reset! prev fileset)))))
-       (set-env! :source-paths #(conj % (.getPath src)))
-       (let [server-url (start-server @pod {:ip ip :port port})]
-            (write-cljs! out (or proxy server-url) on-jsload))
+         (let [pod (make-pod)
+               src (tmp-dir!)
+               tmp (tmp-dir!)
+               prev (atom nil)
+               out (doto (io/file src "adzerk" "boot_reload.cljs") io/make-parents)]
+              (set-env! :source-paths #(conj % (.getPath src)))
+              (comp
+                (with-pre-wrap fileset
+                               (doseq [f (->> fileset input-files (by-ext [".cljs.edn"]))]
+                                      (let [path (tmp-path f)
+                                            in-file (tmp-file f)
+                                            out-file (io/file tmp path)]
+                                           (add-init! in-file out-file)))
+                               (-> fileset (add-resource tmp) commit!))
+                (with-post-wrap fileset
+                                (send-changed! @pod (changed @prev fileset))
+                                (reset! prev fileset)))
+              (set-env! :source-paths #(conj % (.getPath src)))
+              (let [server-url (start-server @pod {:ip ip :port port})]
+                   (write-cljs! out (or proxy server-url) on-jsload))))
 
 
