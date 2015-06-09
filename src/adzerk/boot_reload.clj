@@ -75,6 +75,10 @@
                prev (atom nil)
                out (doto (io/file src "adzerk" "boot_reload.cljs") io/make-parents)]
               (set-env! :source-paths #(conj % (.getPath src)))
+
+              (let [server-url (start-server @pod {:ip ip :port port})]
+                   (write-cljs! out (or proxy server-url) on-jsload))
+
               (comp
                 (with-pre-wrap fileset
                                (doseq [f (->> fileset input-files (by-ext [".cljs.edn"]))]
@@ -85,9 +89,4 @@
                                (-> fileset (add-resource tmp) commit!))
                 (with-post-wrap fileset
                                 (send-changed! @pod (changed @prev fileset))
-                                (reset! prev fileset)))
-              (set-env! :source-paths #(conj % (.getPath src)))
-              (let [server-url (start-server @pod {:ip ip :port port})]
-                   (write-cljs! out (or proxy server-url) on-jsload))))
-
-
+                                (reset! prev fileset)))))
