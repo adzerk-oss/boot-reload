@@ -2,21 +2,24 @@
   (:require
    [clojure.java.io    :as io]
    [boot.util          :as util]
-   [org.httpkit.server :as http])
+   [org.httpkit.server :as http]
+   [clojure.string     :as string])
   (:import
    [java.io IOException]))
 
 (def state (atom {}))
 
-(defn web-path [proto rel-path tgt-path]
+(defn web-path [proto rel-path tgt-path asset-path]
   (if-not (= "file:" proto)
-    (str "/" rel-path)
+    (if asset-path
+      (string/replace rel-path (re-pattern (str "^" asset-path "/")) "")
+      (str "/" rel-path))
     (.getCanonicalPath (io/file tgt-path rel-path))))
 
-(defn send-changed! [tgt-path changed]
+(defn send-changed! [tgt-path asset-path changed]
   (doseq [[id {:keys [proto channel]}] @state]
     (http/send! channel
-      (pr-str (into [] (map #(web-path proto % tgt-path) changed))))))
+      (pr-str (into [] (map #(web-path proto % tgt-path asset-path) changed))))))
 
 (defn set-proto! [channel proto]
   (doseq [[id {c :channel}] @state]

@@ -39,10 +39,13 @@
             (client/connect ~url {:on-jsload #(~(or on-jsload '+))}))))
     (map pr-str) (interpose "\n") (apply str) (spit f)))
 
-(defn- send-changed! [pod changed]
+(defn- send-changed! [pod asset-path changed]
   (when-not (empty? changed)
     (pod/with-call-in pod
-      (adzerk.boot-reload.server/send-changed! ~(get-env :target-path) ~changed))))
+      (adzerk.boot-reload.server/send-changed!
+        ~(get-env :target-path)
+        ~asset-path
+        ~changed))))
 
 (defn- add-init!
   [in-file out-file]
@@ -64,7 +67,8 @@
 
   [i ip ADDR       str "The (optional) IP address for the websocket server to listen on."
    p port PORT     int "The (optional) port the websocket server listens on."
-   j on-jsload SYM sym "The (optional) callback to call when JS files are reloaded."]
+   j on-jsload SYM sym "The (optional) callback to call when JS files are reloaded."
+   a asset-path PATH str "The (optional) asset-path. This is removed from the start of reloaded urls."]
 
   (let [pod  (make-pod)
         src  (tmp-dir!)
@@ -82,6 +86,6 @@
             (add-init! in-file out-file)))
         (-> fileset (add-resource tmp) commit!))
       (with-post-wrap fileset
-        (send-changed! @pod (changed @prev fileset))
+        (send-changed! @pod asset-path (changed @prev fileset))
         (reset! prev fileset)))))
 
