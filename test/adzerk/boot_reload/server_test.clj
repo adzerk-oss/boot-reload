@@ -11,6 +11,9 @@
     (is (= "js/out/saapas/core.js"
            (web-path "http:" "public/js/out/saapas/core.js" nil "public")))
 
+    (is (= "js/out/saapas/core.js"
+           (web-path "http:" "public/js/out/saapas/core.js" nil "/public")))
+
     (is (= "public/js/out/saapas/core.js"
            (web-path "http:" "public/js/out/saapas/core.js" nil "foobar")))
     ))

@@ -12,7 +12,7 @@
 (defn web-path [proto rel-path tgt-path asset-path]
   (if-not (= "file:" proto)
     (if asset-path
-      (string/replace rel-path (re-pattern (str "^" asset-path "/")) "")
+      (string/replace rel-path (re-pattern (str "^" (string/replace asset-path #"^/" "") "/")) "")
       (str "/" rel-path))
     (.getCanonicalPath (io/file tgt-path rel-path))))
 
