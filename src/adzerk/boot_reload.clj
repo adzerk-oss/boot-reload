@@ -41,8 +41,10 @@
 
 (defn- send-changed! [pod changed]
   (when-not (empty? changed)
-    (pod/with-call-in pod
-      (adzerk.boot-reload.server/send-changed! ~(get-env :target-path) ~changed))))
+    (let [asset-path (or (get-env :asset-path) "")
+          changed-rel (map #(str asset-path %) changed)]
+      (pod/with-call-in pod
+        (adzerk.boot-reload.server/send-changed! ~(get-env :target-path) ~changed-rel)))))
 
 (defn- add-init!
   [in-file out-file]
