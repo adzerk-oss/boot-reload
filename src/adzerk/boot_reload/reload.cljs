@@ -13,11 +13,14 @@
 (defn- reload-page! []
   (.reload (.-location js/window)))
 
+(defn- normalize-href-or-uri [href-or-uri]
+  (let [uri  (goog.Uri. href-or-uri)]
+    (.getPath (.resolve page-uri uri))))
+
 (defn- changed-href? [href-or-uri changed]
   (when href-or-uri
-    (let [uri  (goog.Uri. href-or-uri)
-          path (.getPath (.resolve page-uri uri))]
-      (when (not-empty (filter #(ends-with? % path) changed))
+    (let [path (normalize-href-or-uri href-or-uri)]
+      (when (not-empty (filter #(ends-with? (normalize-href-or-uri %) path) changed))
         uri))))
 
 (defn- reload-css [changed]
