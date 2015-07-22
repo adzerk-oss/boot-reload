@@ -35,7 +35,8 @@
        (.open this url protocol)))
 
   (transmit [this message]
-    (.send this message))
+    (when (open? this)
+      (.send this message)))
 
   (close [this]
     (.close this ()))
