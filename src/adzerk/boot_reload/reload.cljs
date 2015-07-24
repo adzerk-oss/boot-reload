@@ -21,7 +21,7 @@
   (when href-or-uri
     (let [path (normalize-href-or-uri href-or-uri)]
       (when (not-empty (filter #(ends-with? (normalize-href-or-uri %) path) changed))
-        path))))
+        (guri/parse path)))))
 
 (defn- reload-css [changed]
   (let [sheets (.. js/document -styleSheets)]
