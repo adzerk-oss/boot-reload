@@ -5,7 +5,7 @@
    [clojure.set        :as set]
    [boot.pod           :as pod]
    [boot.file          :as file]
-   [boot.util          :refer :all]
+   [boot.util          :as util]
    [boot.core          :refer :all]
    [boot.from.backtick :refer [template]]))
 
@@ -25,11 +25,11 @@
   (let [{:keys [ip port]}
         (pod/with-call-in pod (adzerk.boot-reload.server/start ~opts))
         host (if-not (= ip "0.0.0.0") ip "localhost")]
-    (with-let [url (format "ws://%s:%d" host port)]
-      (info "<< started reload server on %s >>\n" url))))
+    (util/with-let [url (format "ws://%s:%d" host port)]
+      (util/info "<< started reload server on %s >>\n" url))))
 
 (defn- write-cljs! [f url on-jsload]
-  (info "Writing %s...\n" (.getName f))
+  (util/info "Writing %s...\n" (.getName f))
   (->> (template
          ((ns adzerk.boot-reload
             (:require
@@ -52,7 +52,7 @@
   (let [ns 'adzerk.boot-reload
         spec (-> in-file slurp read-string)]
     (when (not= :nodejs (-> spec :compiler-options :target))
-      (info "Adding :require %s to %s...\n" ns (.getName in-file))
+      (util/info "Adding :require %s to %s...\n" ns (.getName in-file))
       (io/make-parents out-file)
       (-> spec
         (update-in [:require] conj ns)
