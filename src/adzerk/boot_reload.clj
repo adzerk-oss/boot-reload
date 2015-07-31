@@ -59,16 +59,24 @@
         pr-str
         ((partial spit out-file))))))
 
+(defn relevant-cljs-edn [fileset ids]
+  (let [relevant  (map #(str % ".cljs.edn") ids)
+        f         (if ids
+                    #(b/by-name relevant %)
+                    #(b/by-ext [".cljs.edn"] %))]
+    (-> fileset b/input-files f)))
+
 (deftask reload
   "Live reload of page resources in browser via websocket.
 
   The default configuration starts a websocket server on a random available
   port on localhost."
 
-  [i ip ADDR       str "The (optional) IP address for the websocket server to listen on."
-   p port PORT     int "The (optional) port the websocket server listens on."
-   j on-jsload SYM sym "The (optional) callback to call when JS files are reloaded."
-   a asset-path PATH str "The (optional) asset-path. This is removed from the start of reloaded urls."]
+  [b ids BUILD_IDS #{str} "Only inject reloading into these builds (= .cljs.edn files)"
+   i ip ADDR         str  "The (optional) IP address for the websocket server to listen on."
+   p port PORT       int  "The (optional) port the websocket server listens on."
+   j on-jsload SYM   sym  "The (optional) callback to call when JS files are reloaded."
+   a asset-path PATH str  "The (optional) asset-path. This is removed from the start of reloaded urls."]
 
   (let [pod  (make-pod)
         src  (tmp-dir!)
@@ -79,7 +87,7 @@
     (write-cljs! out (start-server @pod {:ip ip :port port}) on-jsload)
     (comp
       (with-pre-wrap fileset
-        (doseq [f (->> fileset input-files (by-ext [".cljs.edn"]))]
+        (doseq [f (relevant-cljs-edn fileset ids)]
           (let [path     (tmp-path f)
                 in-file  (tmp-file f)
                 out-file (io/file tmp path)]
