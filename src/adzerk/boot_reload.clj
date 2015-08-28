@@ -1,6 +1,7 @@
 (ns adzerk.boot-reload
   {:boot/export-tasks true}
   (:require
+   [boot.core          :as b]
    [clojure.java.io    :as io]
    [clojure.set        :as set]
    [boot.pod           :as pod]
@@ -21,10 +22,11 @@
          (sort-by :dependency-order)
          (map tmp-path))))
 
-(defn- start-server [pod {:keys [ip port] :as opts}]
+(defn- start-server [pod {:keys [ip port ws-host] :as opts}]
   (let [{:keys [ip port]}
         (pod/with-call-in pod (adzerk.boot-reload.server/start ~opts))
-        host (if-not (= ip "0.0.0.0") ip "localhost")]
+        host
+        (cond ws-host ws-host (= ip "0.0.0.0") "localhost" :else ip)]
     (util/with-let [url (format "ws://%s:%d" host port)]
       (util/info "<< started reload server on %s >>\n" url))))
 
@@ -75,6 +77,7 @@
   [b ids BUILD_IDS #{str} "Only inject reloading into these builds (= .cljs.edn files)"
    i ip ADDR         str  "The (optional) IP address for the websocket server to listen on."
    p port PORT       int  "The (optional) port the websocket server listens on."
+   w ws-host WSADDR  str  "The (optional) websocket host address to pass to clients."
    j on-jsload SYM   sym  "The (optional) callback to call when JS files are reloaded."
    a asset-path PATH str  "The (optional) asset-path. This is removed from the start of reloaded urls."]
 
@@ -82,9 +85,10 @@
         src  (tmp-dir!)
         tmp  (tmp-dir!)
         prev (atom nil)
-        out  (doto (io/file src "adzerk" "boot_reload.cljs") io/make-parents)]
+        out  (doto (io/file src "adzerk" "boot_reload.cljs") io/make-parents)
+        url  (start-server @pod {:ip ip :port port :ws-host ws-host})]
     (set-env! :source-paths #(conj % (.getPath src)))
-    (write-cljs! out (start-server @pod {:ip ip :port port}) on-jsload)
+    (write-cljs! out url on-jsload)
     (comp
       (with-pre-wrap fileset
         (doseq [f (relevant-cljs-edn fileset ids)]
@@ -96,4 +100,3 @@
       (with-post-wrap fileset
         (send-changed! @pod asset-path (changed @prev fileset))
         (reset! prev fileset)))))
-
