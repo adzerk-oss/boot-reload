@@ -82,7 +82,7 @@
    w ws-host WSADDR  str  "The (optional) websocket host address to pass to clients."
    j on-jsload SYM   sym  "The (optional) callback to call when JS files are reloaded."
    a asset-path PATH str  "The (optional) asset-path. This is removed from the start of reloaded urls."
-   s secure          bool  "(Optional) flag to indicate whether to connect via wss. Defaults to false."]
+   s secure          bool "Flag to indicate whether the client should connect via wss. Defaults to false."]
 
   (let [pod  (make-pod)
         src  (tmp-dir!)
