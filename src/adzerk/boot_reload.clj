@@ -22,12 +22,14 @@
          (sort-by :dependency-order)
          (map tmp-path))))
 
-(defn- start-server [pod {:keys [ip port ws-host] :as opts}]
+(defn- start-server [pod {:keys [ip port ws-host secure?] :as opts}]
   (let [{:keys [ip port]}
         (pod/with-call-in pod (adzerk.boot-reload.server/start ~opts))
         host
-        (cond ws-host ws-host (= ip "0.0.0.0") "localhost" :else ip)]
-    (util/with-let [url (format "ws://%s:%d" host port)]
+        (cond ws-host ws-host (= ip "0.0.0.0") "localhost" :else ip)
+        proto (if secure? "wss" "ws")
+        ]
+    (util/with-let [url (format "%s://%s:%d" proto host port)]
       (util/info "<< started reload server on %s >>\n" url))))
 
 (defn- write-cljs! [f url on-jsload]
@@ -79,14 +81,15 @@
    p port PORT       int  "The (optional) port the websocket server listens on."
    w ws-host WSADDR  str  "The (optional) websocket host address to pass to clients."
    j on-jsload SYM   sym  "The (optional) callback to call when JS files are reloaded."
-   a asset-path PATH str  "The (optional) asset-path. This is removed from the start of reloaded urls."]
+   a asset-path PATH str  "The (optional) asset-path. This is removed from the start of reloaded urls."
+   s secure          bool  "(Optional) flag to indicate whether to connect via wss. Defaults to false."]
 
   (let [pod  (make-pod)
         src  (tmp-dir!)
         tmp  (tmp-dir!)
         prev (atom nil)
         out  (doto (io/file src "adzerk" "boot_reload.cljs") io/make-parents)
-        url  (start-server @pod {:ip ip :port port :ws-host ws-host})]
+        url  (start-server @pod {:ip ip :port port :ws-host ws-host :secure? secure})]
     (set-env! :source-paths #(conj % (.getPath src)))
     (write-cljs! out url on-jsload)
     (comp
