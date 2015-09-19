@@ -28,7 +28,7 @@
         host
         (cond ws-host ws-host (= ip "0.0.0.0") "localhost" :else ip)]
     (util/with-let [url (format "ws://%s:%d" host port)]
-      (util/info "Starting reload server at %s\n" url))))
+      (util/info "Starting reload server on %s\n" url))))
 
 (defn- write-cljs! [f url on-jsload]
   (util/info "Writing %s...\n" (.getName f))
