@@ -63,7 +63,7 @@
   (doseq [t things-to-log] (.log js/console t))
   (.groupEnd js/console))
 
-(defn reload [opts changed]
+(defn reload [changed opts]
   (group-log "Reload" changed)
   (doto changed
     (reload-js opts)
