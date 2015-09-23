@@ -26,8 +26,9 @@
   [msg opts]
   (rl/reload (rest msg) opts))
 
-(defmethod handle :warn
+(defmethod handle :display
   [msg opts]
+  (js/console.log (pr-str (first (rest msg))))
   (w/warn (first (rest msg)) opts))
 
 (defn connect [url & [opts]]

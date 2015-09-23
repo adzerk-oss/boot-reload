@@ -16,9 +16,9 @@
       (str "/" rel-path))
     (.getCanonicalPath (io/file tgt-path rel-path))))
 
-(defn send-warnings! [warnings]
+(defn send-visual! [warnings]
   (doseq [[id {:keys [proto channel]}] @state]
-    (http/send! channel (pr-str [:warn warnings]))))
+    (http/send! channel (pr-str [:display warnings]))))
 
 (defn send-changed! [tgt-path asset-path changed]
   (doseq [[id {:keys [proto channel]}] @state]

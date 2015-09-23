@@ -41,17 +41,25 @@
              (mk-node :span (styles :warning-detail) (str "at line " (:line-number w)))
              (mk-node :span (styles :warning-detail) (:file w)))))
 
-(defn construct-hud-node [id msgs]
+(defn construct-exception-node [ex]
+  (mk-node :div nil ex))
+
+(defn construct-hud-node [id {:keys [warnings exception]}]
+  (js/console.log exception)
   (let [node (mk-node :div (merge (styles :container) {:id id}))]
     (dom/append node (mk-node :h4 (styles :heading) "Compiler Warnings"))
-    (apply dom/append node (map construct-warning-node msgs))
+    (if exception
+      (dom/append node (construct-warning-node exception))
+      (apply dom/append node (map construct-warning-node warnings)))
     node))
 
-(def current-container (atom))
+(defonce current-container (atom))
+
+(defn gen-id []
+  (str "boot-reload-hud-" (name (gensym))))
 
 (defn warn [warnings opts]
-  (let [id (name (gensym))]
-    ;; (js/console.log "id:" id)
+  (let [id (gen-id)]
     (dom/removeNode (dom/getElement @current-container))
-    (reset! current-container id)
-    (dom/appendChild js/document.body (construct-hud-node id warnings))))
+    (dom/appendChild js/document.body (construct-hud-node id warnings))
+    (reset! current-container id)))

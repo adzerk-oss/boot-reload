@@ -43,10 +43,10 @@
             (client/connect ~url {:on-jsload #(~(or on-jsload '+))}))))
     (map pr-str) (interpose "\n") (apply str) (spit f)))
 
-(defn- send-warnings! [pod warnings]
+(defn- send-visual! [pod warnings]
   (when-not (empty? warnings)
     (pod/with-call-in pod
-      (adzerk.boot-reload.server/send-warnings!
+      (adzerk.boot-reload.server/send-visual!
         ~warnings))))
 
 (defn- send-changed! [pod asset-path changed]
@@ -109,5 +109,5 @@
       (with-post-wrap fileset
         (send-changed! @pod asset-path (changed @prev fileset))
         (doseq [f (relevant-cljs-edn fileset ids)]
-          (send-warnings! @pod (:adzerk.boot-cljs/messages f)))
+          (send-visual! @pod (:adzerk.boot-cljs/messages f)))
         (reset! prev fileset)))))
