@@ -79,7 +79,14 @@
   "Live reload of page resources in browser via websocket.
 
   The default configuration starts a websocket server on a random available
-  port on localhost."
+  port on localhost.
+
+  Open-file option takes three arguments: line number, column number, relative
+  file path. You can use positional arguments if you need different order.
+  Arguments shouldn't have spaces.
+  Examples:
+  vim --remote +norm%sG%s| %s
+  emacsclient -n +%s:%s %s"
 
   [b ids BUILD_IDS #{str} "Only inject reloading into these builds (= .cljs.edn files)"
    i ip ADDR         str  "The (optional) IP address for the websocket server to listen on."
@@ -87,14 +94,16 @@
    w ws-host WSADDR  str  "The (optional) websocket host address to pass to clients."
    j on-jsload SYM   sym  "The (optional) callback to call when JS files are reloaded."
    a asset-path PATH str  "The (optional) asset-path. This is removed from the start of reloaded urls."
-   s secure          bool "Flag to indicate whether the client should connect via wss. Defaults to false."]
+   s secure          bool "Flag to indicate whether the client should connect via wss. Defaults to false."
+   o open-file COMMAND str "The (optional) command to run when warning or exception is clicked on HUD. Passed to format."]
 
   (let [pod  (make-pod)
         src  (tmp-dir!)
         tmp  (tmp-dir!)
         prev (atom nil)
         out  (doto (io/file src "adzerk" "boot_reload.cljs") io/make-parents)
-        url  (start-server @pod {:ip ip :port port :ws-host ws-host :secure? secure})]
+        url  (start-server @pod {:ip ip :port port :ws-host ws-host :secure? secure
+                                 :open-file open-file})]
     (set-env! :source-paths #(conj % (.getPath src)))
     (write-cljs! out url on-jsload)
     (comp
