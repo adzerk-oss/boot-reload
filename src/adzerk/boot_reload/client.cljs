@@ -31,28 +31,29 @@
   (d/display (first (rest msg)) opts))
 
 (defn connect [url & [opts]]
-  (let [conn (ws/websocket-connection)]
-    (patch-goog-base!)
-    (reset! ws-conn conn)
+  (when-not (alive?)
+    (let [conn (ws/websocket-connection)]
+      (patch-goog-base!)
+      (reset! ws-conn conn)
 
-    (event/listen conn :opened
-      (fn [evt]
-        (net/transmit conn (pr-str {:type :set-protocol
-                                    :protocol (.. js/window -location -protocol)}))
-        (.info js/console "Reload websocket connected.")))
+      (event/listen conn :opened
+        (fn [evt]
+          (net/transmit conn (pr-str {:type :set-protocol
+                                      :protocol (.. js/window -location -protocol)}))
+          (.info js/console "Reload websocket connected.")))
 
-    (event/listen conn :message
-      (fn [evt]
-        (let [msg (reader/read-string (.-message evt))]
-          (when (vector? msg) (handle msg opts)))))
+      (event/listen conn :message
+        (fn [evt]
+          (let [msg (reader/read-string (.-message evt))]
+            (when (vector? msg) (handle msg opts)))))
 
-    (event/listen conn :closed
-      (fn [evt]
-        (reset! ws-conn nil)
-        (.info js/console "Reload websocket connection closed.")))
+      (event/listen conn :closed
+        (fn [evt]
+          (reset! ws-conn nil)
+          (.info js/console "Reload websocket connection closed.")))
 
-    (event/listen conn :error
-      (fn [evt]
-        (.error js/console "Reload websocket error:" evt)))
+      (event/listen conn :error
+        (fn [evt]
+          (.error js/console "Reload websocket error:" evt)))
 
-    (net/connect conn url)))
+      (net/connect conn url))))

@@ -39,8 +39,7 @@
             (:require
              [adzerk.boot-reload.client :as client]
              ~@(when on-jsload [(symbol (namespace on-jsload))])))
-          (when-not (client/alive?)
-            (client/connect ~url {:on-jsload #(~(or on-jsload '+))}))))
+          (client/connect ~url {:on-jsload #(~(or on-jsload '+))})))
     (map pr-str) (interpose "\n") (apply str) (spit f)))
 
 (defn- send-visual! [pod messages]
