@@ -9,8 +9,8 @@
 
 (def state (atom {}))
 
-(defn web-path [proto rel-path tgt-path asset-path]
-  (if-not (= "file:" proto)
+(defn web-path [protocol rel-path tgt-path asset-path]
+  (if-not (= "file:" protocol)
     (if asset-path
       (string/replace rel-path (re-pattern (str "^" (string/replace asset-path #"^/" "") "/")) "")
       (str "/" rel-path))
@@ -22,19 +22,19 @@
     (http/send! channel (pr-str [:visual messages]))))
 
 (defn send-changed! [tgt-path asset-path changed]
-  (doseq [[id {:keys [proto channel]}] @state]
+  (doseq [[id {:keys [protocol channel]}] @state]
     (http/send! channel
-      (pr-str (into [:reload] (map #(web-path proto % tgt-path asset-path) changed))))))
+      (pr-str (into [:reload] (map #(web-path protocol % tgt-path asset-path) changed))))))
 
-(defn set-proto! [channel proto]
+(defn set-protocol [channel protocol]
   (doseq [[id {c :channel}] @state]
-    (when (= c channel) (swap! state assoc-in [id :proto] proto))))
+    (when (= c channel) (swap! state assoc-in [id :protocol] protocol))))
 
 (defn connect! [channel]
   (let [id (gensym)]
     (swap! state assoc id {:channel channel})
     (http/on-close channel (fn [_] (swap! state dissoc id)))
-    (http/on-receive channel #(set-proto! channel (read-string %)))))
+    (http/on-receive channel #(set-protocol channel (read-string %)))))
 
 (defn handler [request]
   (if-not (:websocket? request)
