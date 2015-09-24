@@ -87,12 +87,12 @@
       (dom/append node (warnings-node warnings)))
     node))
 
-(defn remove-container [id]
+(defn remove-container! [id]
   (let [el (dom/getElement id)]
     (dom/setProperties el (clj->js (update (style :container :hide) :style ->css)))
     (timer/callOnce #(dom/removeNode el) transition-duration)))
 
-(defn insert-container [id messages]
+(defn insert-container! [id messages]
   (let [hud   (construct-hud-node messages)
         el    (mk-node :div (merge (style :container :hide) {:id id}) hud)
         show! #(dom/setProperties el (clj->js (update (style :container) :style ->css)))]
@@ -108,8 +108,8 @@
   (let [id        (gen-id)
         messages? #(or (:exception %) (not-empty (:warnings %)))]
     (when @current-container
-      (remove-container @current-container))
+      (remove-container! @current-container))
     (if (messages? messages)
-      (do (insert-container id messages)
+      (do (insert-container! id messages)
           (reset! current-container id))
       (reset! current-container nil))))
