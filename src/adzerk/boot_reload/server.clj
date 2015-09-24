@@ -26,7 +26,9 @@
     (http/send! channel
       (pr-str (into [:reload] (map #(web-path protocol % tgt-path asset-path) changed))))))
 
-(defn set-protocol [channel protocol]
+(defmulti handle-message (fn [channel message] (:type message)))
+
+(defmethod handle-message :set-protocol [channel {:keys [protocol]}]
   (doseq [[id {c :channel}] @state]
     (when (= c channel) (swap! state assoc-in [id :protocol] protocol))))
 
@@ -34,7 +36,7 @@
   (let [id (gensym)]
     (swap! state assoc id {:channel channel})
     (http/on-close channel (fn [_] (swap! state dissoc id)))
-    (http/on-receive channel #(set-protocol channel (read-string %)))))
+    (http/on-receive channel #(handle-message channel (read-string %)))))
 
 (defn handler [request]
   (if-not (:websocket? request)

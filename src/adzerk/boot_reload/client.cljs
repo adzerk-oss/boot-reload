@@ -37,7 +37,8 @@
 
     (event/listen conn :opened
       (fn [evt]
-        (net/transmit conn (pr-str (.. js/window -location -protocol)))
+        (net/transmit conn (pr-str {:type :set-protocol
+                                    :protocol (.. js/window -location -protocol)}))
         (.info js/console "Reload websocket connected.")))
 
     (event/listen conn :message
