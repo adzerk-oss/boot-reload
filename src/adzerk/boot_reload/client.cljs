@@ -26,7 +26,7 @@
   [msg opts]
   (rl/reload (rest msg) opts))
 
-(defmethod handle :display
+(defmethod handle :visual
   [msg opts]
   (d/display (first (rest msg)) opts))
 

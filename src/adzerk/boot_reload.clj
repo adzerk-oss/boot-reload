@@ -43,11 +43,11 @@
             (client/connect ~url {:on-jsload #(~(or on-jsload '+))}))))
     (map pr-str) (interpose "\n") (apply str) (spit f)))
 
-(defn- send-visual! [pod warnings]
-  (when-not (empty? warnings)
+(defn- send-visual! [pod messages]
+  (when-not (empty? messages)
     (pod/with-call-in pod
       (adzerk.boot-reload.server/send-visual!
-        ~warnings))))
+        ~messages))))
 
 (defn- send-changed! [pod asset-path changed]
   (when-not (empty? changed)
