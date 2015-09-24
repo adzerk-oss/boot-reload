@@ -2,7 +2,7 @@
   (:require
    [adzerk.boot-reload.websocket :as ws]
    [adzerk.boot-reload.reload    :as rl]
-   [adzerk.boot-reload.warn      :as w]
+   [adzerk.boot-reload.display   :as d]
    [clojure.browser.net          :as net]
    [clojure.browser.event        :as event]
    [cljs.reader                  :as reader]
@@ -28,8 +28,7 @@
 
 (defmethod handle :display
   [msg opts]
-  (js/console.log (pr-str (first (rest msg))))
-  (w/warn (first (rest msg)) opts))
+  (d/display (first (rest msg)) opts))
 
 (defn connect [url & [opts]]
   (let [conn (ws/websocket-connection)]
