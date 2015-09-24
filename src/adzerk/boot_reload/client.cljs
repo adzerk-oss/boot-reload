@@ -3,14 +3,11 @@
    [adzerk.boot-reload.websocket :as ws]
    [adzerk.boot-reload.reload    :as rl]
    [adzerk.boot-reload.display   :as d]
+   [adzerk.boot-reload.connection :refer [send-message! ws-conn alive?]]
    [clojure.browser.net          :as net]
    [clojure.browser.event        :as event]
    [cljs.reader                  :as reader]
    [goog.net.jsloader            :as jsloader]))
-
-(def ^:private ws-conn (atom nil))
-
-(defn alive? [] (not (nil? @ws-conn)))
 
 ;; Thanks, lein-figwheel & lively!
 (defn patch-goog-base! []
@@ -38,8 +35,8 @@
 
       (event/listen conn :opened
         (fn [evt]
-          (net/transmit conn (pr-str {:type :set-protocol
-                                      :protocol (.. js/window -location -protocol)}))
+          (send-message! {:type :set-protocol
+                          :protocol (.. js/window -location -protocol)})
           (.info js/console "Reload websocket connected.")))
 
       (event/listen conn :message
