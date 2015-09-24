@@ -56,23 +56,14 @@
                        :bottom "-100px"]}]
     {:style (apply concat (map s types))}))
 
-(defn parse-warning [warning]
-  (let [segs           (map string/trim (string/split warning #"at line"))
-        [line-no file] (string/split (second segs) #" " 2)
-        warning        {:warning-txt (first segs)
-                        :line-number line-no
-                        :file        file}]
-    warning))
+(defn exception-node [{:keys [message line file]}]
+  (mk-node :div nil message))
 
-(defn exception-node [ex]
-  (mk-node :div nil ex))
-
-(defn warning-node [warning]
-  (let [w (parse-warning warning)]
-    (mk-node :div nil
-             [(mk-node :span (style :mr10) (:warning-txt w))
-              (mk-node :span (style :mr10) (str "at line " (:line-number w)))
-              (mk-node :span (style :mr10) (:file w))])))
+(defn warning-node [{:keys [message line file]}]
+  (mk-node :div nil
+           [(mk-node :span (style :mr10) message)
+            (mk-node :span (style :mr10) (str "at line " line))
+            (mk-node :span (style :mr10) file)]))
 
 (defn warnings-node [warnings]
   (mk-node :div nil (map warning-node warnings)))
