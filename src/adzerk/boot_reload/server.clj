@@ -16,10 +16,15 @@
       (str "/" rel-path))
     (.getCanonicalPath (io/file tgt-path rel-path))))
 
+(defn send-visual! [messages]
+  (prn messages)
+  (doseq [[id {:keys [channel]}] @state]
+    (http/send! channel (pr-str [:visual messages]))))
+
 (defn send-changed! [tgt-path asset-path changed]
   (doseq [[id {:keys [proto channel]}] @state]
     (http/send! channel
-      (pr-str (into [] (map #(web-path proto % tgt-path asset-path) changed))))))
+      (pr-str (into [:reload] (map #(web-path proto % tgt-path asset-path) changed))))))
 
 (defn set-proto! [channel proto]
   (doseq [[id {c :channel}] @state]

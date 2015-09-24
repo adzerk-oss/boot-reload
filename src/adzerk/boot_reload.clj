@@ -43,6 +43,12 @@
             (client/connect ~url {:on-jsload #(~(or on-jsload '+))}))))
     (map pr-str) (interpose "\n") (apply str) (spit f)))
 
+(defn- send-visual! [pod messages]
+  (when-not (empty? messages)
+    (pod/with-call-in pod
+      (adzerk.boot-reload.server/send-visual!
+        ~messages))))
+
 (defn- send-changed! [pod asset-path changed]
   (when-not (empty? changed)
     (pod/with-call-in pod
@@ -102,4 +108,6 @@
         (-> fileset (add-resource tmp) commit!))
       (with-post-wrap fileset
         (send-changed! @pod asset-path (changed @prev fileset))
+        (doseq [f (relevant-cljs-edn fileset ids)]
+          (send-visual! @pod (:adzerk.boot-cljs/messages f)))
         (reset! prev fileset)))))

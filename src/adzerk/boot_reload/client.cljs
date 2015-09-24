@@ -2,6 +2,7 @@
   (:require
    [adzerk.boot-reload.websocket :as ws]
    [adzerk.boot-reload.reload    :as rl]
+   [adzerk.boot-reload.display   :as d]
    [clojure.browser.net          :as net]
    [clojure.browser.event        :as event]
    [cljs.reader                  :as reader]
@@ -18,6 +19,17 @@
                                                        (when (.inHtmlDocument_ js/goog)
                                                          (jsloader/load file)))))
 
+(defmulti handle
+  (fn [msg opts] (first msg)))
+
+(defmethod handle :reload
+  [msg opts]
+  (rl/reload (rest msg) opts))
+
+(defmethod handle :visual
+  [msg opts]
+  (d/display (first (rest msg)) opts))
+
 (defn connect [url & [opts]]
   (let [conn (ws/websocket-connection)]
     (patch-goog-base!)
@@ -31,7 +43,7 @@
     (event/listen conn :message
       (fn [evt]
         (let [msg (reader/read-string (.-message evt))]
-          (when (vector? msg) (rl/reload opts msg)))))
+          (when (vector? msg) (handle msg opts)))))
 
     (event/listen conn :closed
       (fn [evt]
