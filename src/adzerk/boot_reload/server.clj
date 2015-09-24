@@ -17,7 +17,6 @@
     (.getCanonicalPath (io/file tgt-path rel-path))))
 
 (defn send-visual! [messages]
-  (prn messages)
   (doseq [[id {:keys [channel]}] @state]
     (http/send! channel (pr-str [:visual messages]))))
 
@@ -26,24 +25,33 @@
     (http/send! channel
       (pr-str (into [:reload] (map #(web-path protocol % tgt-path asset-path) changed))))))
 
-(defmulti handle-message (fn [channel message] (:type message)))
+(defmulti handle-message (fn [_ channel message] (:type message)))
 
-(defmethod handle-message :set-protocol [channel {:keys [protocol]}]
+(defmethod handle-message :set-protocol [_ channel {:keys [protocol]}]
   (doseq [[id {c :channel}] @state]
     (when (= c channel) (swap! state assoc-in [id :protocol] protocol))))
 
-(defn connect! [channel]
+(defmethod handle-message :open-file [{:keys [open-file]} channel {:keys [file line column]}]
+  (when open-file
+    (let [cmd (format open-file (or line 0) (or column 0) (or file ""))]
+      (util/dbug "Open-file call: %s\n" cmd)
+      (try
+        (.exec (Runtime/getRuntime) cmd)
+        (catch Exception e
+          (util/fail "There was a problem running open-file command: %s\n" cmd))))))
+
+(defn connect! [opts channel]
   (let [id (gensym)]
     (swap! state assoc id {:channel channel})
     (http/on-close channel (fn [_] (swap! state dissoc id)))
-    (http/on-receive channel #(handle-message channel (read-string %)))))
+    (http/on-receive channel #(handle-message opts channel (read-string %)))))
 
-(defn handler [request]
+(defn handler [opts request]
   (if-not (:websocket? request)
     {:status 501 :body "Websocket connections only."}
-    (http/with-channel request channel (connect! channel))))
+    (http/with-channel request channel (connect! opts channel))))
 
 (defn start
   [{:keys [ip port] :as opts}]
   (let [o {:ip (or ip "0.0.0.0") :port (or port 0)}]
-    (assoc o :port (-> (http/run-server handler o) meta :local-port))))
+    (assoc o :port (-> (http/run-server (partial handler opts) o) meta :local-port))))

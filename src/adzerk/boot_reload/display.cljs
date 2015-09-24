@@ -1,7 +1,10 @@
 (ns adzerk.boot-reload.display
   (:require [clojure.string :as string]
             [goog.Timer :as timer]
-            [goog.dom :as dom]))
+            [goog.dom :as dom]
+            [goog.events :as events]
+            [adzerk.boot-reload.connection :refer [send-message!]])
+  (:import [goog.events EventType]))
 
 (def transition-duration 250)
 
@@ -56,14 +59,20 @@
                        :bottom "-100px"]}]
     {:style (apply concat (map s types))}))
 
-(defn exception-node [{:keys [message line file]}]
-  (mk-node :div nil message))
+(defn open-file [data]
+  (send-message! (merge {:type :open-file}
+                        (select-keys data [:file :line :column]))))
 
-(defn warning-node [{:keys [message line file]}]
-  (mk-node :div nil
-           [(mk-node :span (style :mr10) message)
-            (mk-node :span (style :mr10) (str "at line " line))
-            (mk-node :span (style :mr10) file)]))
+(defn exception-node [{:keys [message line file] :as data}]
+  (doto (mk-node :div nil message)
+    (events/listen EventType.CLICK #(open-file data))))
+
+(defn warning-node [{:keys [message line file] :as data}]
+  (doto (mk-node :div nil
+                 [(mk-node :span (style :mr10) message)
+                  (mk-node :span (style :mr10) (str "at line " line))
+                  (mk-node :span (style :mr10) file)])
+    (events/listen EventType.CLICK #(open-file data))))
 
 (defn warnings-node [warnings]
   (mk-node :div nil (map warning-node warnings)))
