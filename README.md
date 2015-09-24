@@ -39,6 +39,6 @@ Copyright © 2014 Adzerk
 Distributed under the Eclipse Public License either version 1.0 or (at
 your option) any later version.
 
-[1]:                https://github.com/tailrecursion/boot
-[2]:                http://clojars.org/adzerk/boot-reload/latest-version.svg?cache=6
-[3]:                http://clojars.org/adzerk/boot-reload
+[1]:                https://github.com/boot-clj/boot
+[2]:                http://clojars.org/adzerk-oss/boot-reload/latest-version.svg?cache=6
+[3]:                http://clojars.org/adzerk-oss/boot-reload
