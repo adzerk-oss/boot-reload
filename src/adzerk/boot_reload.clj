@@ -57,11 +57,11 @@
         ~changed))))
 
 (defn- add-init!
-  [in-file out-file]
+  [in-file out-file first-run?]
   (let [ns 'adzerk.boot-reload
         spec (-> in-file slurp read-string)]
     (when (not= :nodejs (-> spec :compiler-options :target))
-      (util/info "Adding :require %s to %s...\n" ns (.getName in-file))
+      ((if first-run? util/info util/dbug) "Adding :require %s to %s...\n" ns (.getName in-file))
       (io/make-parents out-file)
       (-> spec
         (update-in [:require] conj ns)
@@ -101,6 +101,7 @@
         src  (tmp-dir!)
         tmp  (tmp-dir!)
         prev (atom nil)
+        enabled-files (atom #{})
         out  (doto (io/file src "adzerk" "boot_reload.cljs") io/make-parents)
         url  (start-server @pod {:ip ip :port port :ws-host ws-host :secure? secure
                                  :open-file open-file})]
@@ -112,7 +113,8 @@
           (let [path     (tmp-path f)
                 in-file  (tmp-file f)
                 out-file (io/file tmp path)]
-            (add-init! in-file out-file)))
+            (add-init! in-file out-file (not (contains? @enabled-files path)))
+            (swap! enabled-files conj path)))
         (-> fileset (add-resource tmp) commit!))
       (with-post-wrap fileset
         (send-changed! @pod asset-path (changed @prev fileset))
