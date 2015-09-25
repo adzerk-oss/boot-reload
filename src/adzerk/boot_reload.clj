@@ -57,23 +57,23 @@
         ~changed))))
 
 (defn- add-init!
-  [in-file out-file first-run?]
+  [in-file out-file]
   (let [ns 'adzerk.boot-reload
         spec (-> in-file slurp read-string)]
     (when (not= :nodejs (-> spec :compiler-options :target))
-      ((if first-run? util/info util/dbug) "Adding :require %s to %s...\n" ns (.getName in-file))
+      (util/info "Adding :require %s to %s...\n" ns (.getName in-file))
       (io/make-parents out-file)
       (-> spec
         (update-in [:require] conj ns)
         pr-str
         ((partial spit out-file))))))
 
-(defn relevant-cljs-edn [fileset ids]
+(defn relevant-cljs-edn [prev fileset ids]
   (let [relevant  (map #(str % ".cljs.edn") ids)
         f         (if ids
                     #(b/by-name relevant %)
                     #(b/by-ext [".cljs.edn"] %))]
-    (-> fileset b/input-files f)))
+    (-> (b/fileset-diff prev fileset) b/input-files f)))
 
 (deftask reload
   "Live reload of page resources in browser via websocket.
@@ -100,8 +100,8 @@
   (let [pod  (make-pod)
         src  (tmp-dir!)
         tmp  (tmp-dir!)
+        prev-pre (atom nil)
         prev (atom nil)
-        enabled-files (atom #{})
         out  (doto (io/file src "adzerk" "boot_reload.cljs") io/make-parents)
         url  (start-server @pod {:ip ip :port port :ws-host ws-host :secure? secure
                                  :open-file open-file})]
@@ -109,15 +109,15 @@
     (write-cljs! out url on-jsload)
     (comp
       (with-pre-wrap fileset
-        (doseq [f (relevant-cljs-edn fileset ids)]
+        (doseq [f (relevant-cljs-edn @prev-pre fileset ids)]
           (let [path     (tmp-path f)
                 in-file  (tmp-file f)
                 out-file (io/file tmp path)]
-            (add-init! in-file out-file (not (contains? @enabled-files path)))
-            (swap! enabled-files conj path)))
+            (add-init! in-file out-file)))
+        (reset! prev-pre fileset)
         (-> fileset (add-resource tmp) commit!))
       (with-post-wrap fileset
         (send-changed! @pod asset-path (changed @prev fileset))
-        (doseq [f (relevant-cljs-edn fileset ids)]
+        (doseq [f (relevant-cljs-edn nil fileset ids)]
           (send-visual! @pod (:adzerk.boot-cljs/messages f)))
         (reset! prev fileset)))))
