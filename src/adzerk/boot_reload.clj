@@ -121,7 +121,11 @@
                           (send-visual! @pod {:exception (merge {:message (.getMessage e)}
                                                                 (ex-data e))})
                           (throw e)))]
-          (send-changed! @pod asset-path (changed @prev fileset))
-          (doseq [f (relevant-cljs-edn nil fileset ids)]
-            (send-visual! @pod (:adzerk.boot-cljs/messages f)))
-          (reset! prev fileset))))))
+          (let [warnings (apply merge (map :adzerk.boot-cljs/warnings (relevant-cljs-edn nil fileset ids)))]
+            (send-visual! @pod {:warnings warnings})
+            ; Only send changed files when there are no warnings
+            ; As prev is updated only when changes are sent, changes are queued untill they can be sent
+            (when (empty? warnings)
+              (send-changed! @pod asset-path (changed @prev fileset))
+              (reset! prev fileset))
+            fileset))))))
