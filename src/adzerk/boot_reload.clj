@@ -106,16 +106,16 @@
                                  :open-file open-file})]
     (set-env! :source-paths #(conj % (.getPath src)))
     (write-cljs! out url on-jsload)
-    (comp
-      (with-pre-wrap fileset
+    (fn [next-task]
+      (fn [fileset]
         (doseq [f (relevant-cljs-edn fileset ids)]
           (let [path     (tmp-path f)
                 in-file  (tmp-file f)
                 out-file (io/file tmp path)]
             (add-init! in-file out-file)))
-        (-> fileset (add-resource tmp) commit!))
-      (with-post-wrap fileset
-        (send-changed! @pod asset-path (changed @prev fileset))
-        (doseq [f (relevant-cljs-edn fileset ids)]
-          (send-visual! @pod (:adzerk.boot-cljs/messages f)))
-        (reset! prev fileset)))))
+        (let [fileset (-> fileset (add-resource tmp) commit!)
+              fileset (next-task fileset)]
+          (send-changed! @pod asset-path (changed @prev fileset))
+          (doseq [f (relevant-cljs-edn fileset ids)]
+            (send-visual! @pod (:adzerk.boot-cljs/messages f)))
+          (reset! prev fileset))))))
