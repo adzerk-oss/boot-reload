@@ -23,12 +23,9 @@
          (map tmp-path))))
 
 (defn- start-server [pod {:keys [ip port ws-host secure?] :as opts}]
-  (let [{:keys [ip port]}
-        (pod/with-call-in pod (adzerk.boot-reload.server/start ~opts))
-        host
-        (cond ws-host ws-host (= ip "0.0.0.0") "localhost" :else ip)
-        proto (if secure? "wss" "ws")
-        ]
+  (let [{:keys [ip port]} (pod/with-call-in pod (adzerk.boot-reload.server/start ~opts))
+        host              (cond ws-host ws-host (= ip "0.0.0.0") "localhost" :else ip)
+        proto             (if secure? "wss" "ws")]
     (util/with-let [url (format "%s://%s:%d" proto host port)]
       (util/info "Starting reload server on %s\n" url))))
 
@@ -109,6 +106,8 @@
     (write-cljs! out url on-jsload)
     (fn [next-task]
       (fn [fileset]
+        (pod/with-call-in @pod
+          (adzerk.boot-reload.server/set-options {:open-file open-file}))
         (doseq [f (relevant-cljs-edn @prev-pre fileset ids)]
           (let [path     (tmp-path f)
                 in-file  (tmp-file f)
