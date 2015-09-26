@@ -68,12 +68,12 @@
         pr-str
         ((partial spit out-file))))))
 
-(defn relevant-cljs-edn [fileset ids]
+(defn relevant-cljs-edn [prev fileset ids]
   (let [relevant  (map #(str % ".cljs.edn") ids)
         f         (if ids
                     #(b/by-name relevant %)
                     #(b/by-ext [".cljs.edn"] %))]
-    (-> fileset b/input-files f)))
+    (-> (b/fileset-diff prev fileset) b/input-files f)))
 
 (deftask reload
   "Live reload of page resources in browser via websocket.
@@ -100,6 +100,7 @@
   (let [pod  (make-pod)
         src  (tmp-dir!)
         tmp  (tmp-dir!)
+        prev-pre (atom nil)
         prev (atom nil)
         out  (doto (io/file src "adzerk" "boot_reload.cljs") io/make-parents)
         url  (start-server @pod {:ip ip :port port :ws-host ws-host :secure? secure
@@ -108,11 +109,12 @@
     (write-cljs! out url on-jsload)
     (fn [next-task]
       (fn [fileset]
-        (doseq [f (relevant-cljs-edn fileset ids)]
+        (doseq [f (relevant-cljs-edn @prev-pre fileset ids)]
           (let [path     (tmp-path f)
                 in-file  (tmp-file f)
                 out-file (io/file tmp path)]
             (add-init! in-file out-file)))
+        (reset! prev-pre fileset)
         (let [fileset (-> fileset (add-resource tmp) commit!)
               fileset (try
                         (next-task fileset)
@@ -121,6 +123,6 @@
                                                                 (ex-data e))})
                           (throw e)))]
           (send-changed! @pod asset-path (changed @prev fileset))
-          (doseq [f (relevant-cljs-edn fileset ids)]
+          (doseq [f (relevant-cljs-edn nil fileset ids)]
             (send-visual! @pod (:adzerk.boot-cljs/messages f)))
           (reset! prev fileset))))))
