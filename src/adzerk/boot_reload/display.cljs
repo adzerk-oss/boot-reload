@@ -78,14 +78,11 @@
   (mk-node :div nil (map warning-node warnings)))
 
 (defn construct-hud-node [{:keys [warnings exception] :as messages}]
-  (let [wrapper-styles (style :pad :flex :flex-c (if exception :bg-red :bg-yellow))
-        logo-node (mk-node :div (style :logo :mr10) (dom/htmlToDocumentFragment cljs-logo))
-        node (mk-node :div wrapper-styles)]
-    (dom/append node logo-node)
-    (if exception
-      (dom/append node (exception-node exception))
-      (dom/append node (warnings-node warnings)))
-    node))
+  (doto (mk-node :div (style :pad :flex :flex-c (if exception :bg-red :bg-yellow)))
+    (dom/append (mk-node :div (style :logo :mr10) (dom/htmlToDocumentFragment cljs-logo)))
+    (dom/append (if exception
+                  (exception-node exception)
+                  (warnings-node warnings)))))
 
 (defn remove-container! [id]
   (let [el (dom/getElement id)]
@@ -99,17 +96,16 @@
     (dom/appendChild js/document.body el)
     (timer/callOnce show! transition-duration)))
 
-(defonce current-container (atom))
-
 (defn gen-id []
   (str "boot-reload-hud-" (name (gensym))))
 
+(defonce current-container (atom nil))
+
 (defn display [messages opts]
-  (let [id        (gen-id)
-        messages? #(or (:exception %) (not-empty (:warnings %)))]
-    (when @current-container
-      (remove-container! @current-container))
-    (if (messages? messages)
-      (do (insert-container! id messages)
-          (reset! current-container id))
-      (reset! current-container nil))))
+  (swap! current-container
+         (fn [container]
+           (when container (remove-container! container))
+           (when (or (:exception messages) (seq (:warnings messages)))
+             (let [id (gen-id)]
+               (insert-container! id messages)
+               id)))))
