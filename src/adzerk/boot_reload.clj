@@ -114,7 +114,12 @@
                 out-file (io/file tmp path)]
             (add-init! in-file out-file)))
         (let [fileset (-> fileset (add-resource tmp) commit!)
-              fileset (next-task fileset)]
+              fileset (try
+                        (next-task fileset)
+                        (catch Exception e
+                          (send-visual! @pod {:exception (merge {:message (.getMessage e)}
+                                                                (ex-data e))})
+                          (throw e)))]
           (send-changed! @pod asset-path (changed @prev fileset))
           (doseq [f (relevant-cljs-edn fileset ids)]
             (send-visual! @pod (:adzerk.boot-cljs/messages f)))
