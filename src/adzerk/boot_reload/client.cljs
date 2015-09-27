@@ -16,16 +16,15 @@
                                                        (when (.inHtmlDocument_ js/goog)
                                                          (jsloader/load file)))))
 
-(defmulti handle
-  (fn [msg opts] (first msg)))
+(defmulti handle (fn [msg opts] (:type msg)))
 
 (defmethod handle :reload
-  [msg opts]
-  (rl/reload (rest msg) opts))
+  [{:keys [files]} opts]
+  (rl/reload files opts))
 
 (defmethod handle :visual
-  [msg opts]
-  (d/display (first (rest msg)) opts))
+  [state opts]
+  (d/display state opts))
 
 (defn connect [url & [opts]]
   (when-not (alive?)
@@ -42,7 +41,7 @@
       (event/listen conn :message
         (fn [evt]
           (let [msg (reader/read-string (.-message evt))]
-            (when (vector? msg) (handle msg opts)))))
+            (handle msg opts))))
 
       (event/listen conn :closed
         (fn [evt]
