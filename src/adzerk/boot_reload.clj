@@ -107,7 +107,7 @@
     (fn [next-task]
       (fn [fileset]
         (pod/with-call-in @pod
-          (adzerk.boot-reload.server/set-options {:open-file open-file}))
+          (adzerk.boot-reload.server/set-options {:open-file ~open-file}))
         (doseq [f (relevant-cljs-edn @prev-pre fileset ids)]
           (let [path     (tmp-path f)
                 in-file  (tmp-file f)
