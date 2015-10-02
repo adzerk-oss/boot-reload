@@ -48,6 +48,7 @@
                        :box-shadow "rgb(170, 170, 170) 0px 0px 1px"]
            :bg-yellow [:background-color "rgba(255, 220, 110, 0.952941)"
                        :box-shadow "rgb(170, 170, 170) 0px 0px 1px"]
+           :bg-clear  [:background-color "none"]
            :mr10      [:margin-right "10px"]
            :pad       [:padding "12px"]
            :container [:color "black"
@@ -76,27 +77,36 @@
                   (mk-node :span (style :mr10) file)])
     (events/listen EventType.CLICK #(open-file data))))
 
+(defn reloaded-node []
+  (mk-node :div nil nil))
+
 (defn warnings-node [warnings]
   (mk-node :div nil (map warning-node warnings)))
 
 (defn construct-hud-node [{:keys [warnings exception] :as messages}]
-  (doto (mk-node :div (style :pad :flex :flex-c (if exception :bg-red :bg-yellow)))
+  (doto (mk-node :div (style :pad :flex :flex-c (cond exception      :bg-red
+                                                      (seq warnings) :bg-yellow
+                                                      :else          :bg-clear)))
     (dom/append (mk-node :div (style :logo :mr10) (dom/htmlToDocumentFragment cljs-logo)))
-    (dom/append (if exception
-                  (exception-node exception)
-                  (warnings-node warnings)))))
+    (dom/append (cond exception      (exception-node exception)
+                      (seq warnings) (warnings-node warnings)
+                      :else          (reloaded-node)))))
 
 (defn remove-container! [id]
   (let [el (dom/getElement id)]
     (dom/setProperties el (clj->js (update (style :container :hide) :style ->css)))
     (timer/callOnce #(dom/removeNode el) transition-duration)))
 
-(defn insert-container! [id messages]
-  (let [hud   (construct-hud-node messages)
-        el    (mk-node :div (merge (style :container :hide) {:id id}) hud)
-        show! #(dom/setProperties el (clj->js (update (style :container) :style ->css)))]
+(defn insert-container! [id {:keys [warnings exception] :as messages}]
+  (let [hud      (construct-hud-node messages)
+        el       (mk-node :div (merge (style :container :hide) {:id id}) hud)
+        show!    #(dom/setProperties el (clj->js (update (style :container) :style ->css)))
+        no-prob? (and (not exception) (not (seq warnings)))
+        hide!    #(dom/setProperties el (clj->js (update (style :container :hide) :style ->css)))]
     (dom/appendChild js/document.body el)
-    (timer/callOnce show! transition-duration)))
+    (timer/callOnce show! transition-duration)
+    (when no-prob?
+      (timer/callOnce hide! (* transition-duration 3)))))
 
 (defn gen-id []
   (str "boot-reload-hud-" (name (gensym))))
@@ -107,7 +117,6 @@
   (swap! current-container
          (fn [container]
            (when container (remove-container! container))
-           (when (or (:exception messages) (seq (:warnings messages)))
-             (let [id (gen-id)]
-               (insert-container! id messages)
-               id)))))
+           (let [id (gen-id)]
+             (insert-container! id messages)
+             id))))
