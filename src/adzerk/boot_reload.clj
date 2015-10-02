@@ -68,7 +68,7 @@
 (defn relevant-cljs-edn [prev fileset ids]
   (let [relevant  (map #(str % ".cljs.edn") ids)
         f         (if ids
-                    #(b/by-name relevant %)
+                    #(b/by-path relevant %)
                     #(b/by-ext [".cljs.edn"] %))]
     (-> (b/fileset-diff prev fileset) b/input-files f)))
 
