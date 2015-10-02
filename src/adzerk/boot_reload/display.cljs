@@ -44,8 +44,10 @@
   (let [s {:logo      [:width "40px" :height "40px"]
            :flex      [:display "-webkit-box" :display "-webkit-flex" :display "-ms-flexbox" :display "flex"]
            :flex-c    [:-webkit-box-align "center" :-webkit-align-items "center" :-ms-flex-align "center" :align-items "center"]
-           :bg-red    [:background-color "#FF4136"]
-           :bg-yellow [:background-color "#FFDC00"]
+           :bg-red    [:background-color "rgba(255, 161, 161, 0.952941)"
+                       :box-shadow "rgb(170, 170, 170) 0px 0px 1px"]
+           :bg-yellow [:background-color "rgba(255, 220, 110, 0.952941)"
+                       :box-shadow "rgb(170, 170, 170) 0px 0px 1px"]
            :mr10      [:margin-right "10px"]
            :pad       [:padding "12px"]
            :container [:color "black"
