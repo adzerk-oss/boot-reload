@@ -9,12 +9,24 @@ the project change. Communication with the client is via websockets.
 
 ## Usage
 
-Add `boot-reload` to your `build.boot` dependencies and `require` the namespace:
+Add dependency to `build.boot` and `require` the task:
 
 ```clj
 (set-env! :dependencies '[[adzerk/boot-reload "X.Y.Z" :scope "test"]])
-(require '[adzerk.boot-reload :refer :all])
+
+(require '[adzerk.boot-reload :refer [reload])
 ```
+
+Add the task to your development pipeline **before `(cljs ...)`**:
+
+```clj
+(deftask dev []
+  (comp
+   (reload)
+   (cljs)))
+```
+
+## Additional Info
 
 You can see the options available on the command line:
 
@@ -30,7 +42,10 @@ boot.user=> (doc reload)
 
 ## Examples
 
-FIXME.
+For in-depth, up-to-date examples of how to use `reload` in
+development, see
+[Boot templates and example projects](https://github.com/clojure/clojurescript/wiki#boot)
+in the ClojureScript wiki.
 
 ## License
 
