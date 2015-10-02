@@ -118,8 +118,9 @@
               fileset (try
                         (next-task fileset)
                         (catch Exception e
-                          (send-visual! @pod {:exception (merge {:message (.getMessage e)}
-                                                                (ex-data e))})
+                          (if (= :boot-cljs (:from (ex-data e)))
+                            (send-visual! @pod {:exception (merge {:message (.getMessage e)}
+                                                                  (ex-data e))}))
                           (throw e)))]
           (let [warnings (apply merge (map :adzerk.boot-cljs/warnings (relevant-cljs-edn nil fileset ids)))]
             (send-visual! @pod {:warnings warnings})
