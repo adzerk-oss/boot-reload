@@ -72,6 +72,11 @@
                     #(b/by-ext [".cljs.edn"] %))]
     (-> (b/fileset-diff prev fileset) b/input-files f)))
 
+(defn- filter-by-ids [ids changes]
+  (let [ids-str (apply str (interpose \| ids))
+        ids-re  (re-pattern (str "(" ids-str ")[.]{1}out/.+"))]
+    (filter #(re-find ids-re %) changes)))
+
 (deftask reload
   "Live reload of page resources in browser via websocket.
 
@@ -126,6 +131,9 @@
             ; Only send changed files when there are no warnings
             ; As prev is updated only when changes are sent, changes are queued untill they can be sent
             (when (empty? warnings)
-              (send-changed! @pod asset-path (changed @prev fileset))
-              (reset! prev fileset))
+              (let [changes (if ids
+                              (filter-by-ids ids (changed @prev fileset))
+                              (changed @prev fileset))]
+                (send-changed! @pod asset-path changes)
+                (reset! prev fileset)))
             fileset))))))
