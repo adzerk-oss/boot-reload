@@ -65,12 +65,12 @@
         pr-str
         ((partial spit out-file))))))
 
-(defn relevant-cljs-edn [prev fileset ids]
+(defn relevant-cljs-edn [fileset ids]
   (let [relevant  (map #(str % ".cljs.edn") ids)
         f         (if ids
                     #(b/by-path relevant %)
                     #(b/by-ext [".cljs.edn"] %))]
-    (-> (b/fileset-diff prev fileset) b/input-files f)))
+    (-> fileset b/input-files f)))
 
 (deftask reload
   "Live reload of page resources in browser via websocket.
@@ -108,7 +108,7 @@
       (fn [fileset]
         (pod/with-call-in @pod
           (adzerk.boot-reload.server/set-options {:open-file ~open-file}))
-        (doseq [f (relevant-cljs-edn @prev-pre fileset ids)]
+        (doseq [f (relevant-cljs-edn (b/fileset-diff @prev-pre fileset) ids)]
           (let [path     (tmp-path f)
                 in-file  (tmp-file f)
                 out-file (io/file tmp path)]
@@ -122,7 +122,7 @@
                             (send-visual! @pod {:exception (merge {:message (.getMessage e)}
                                                                   (ex-data e))}))
                           (throw e)))]
-          (let [warnings (apply merge (map :adzerk.boot-cljs/warnings (relevant-cljs-edn nil fileset ids)))]
+          (let [warnings (apply merge (map :adzerk.boot-cljs/warnings (relevant-cljs-edn fileset ids)))]
             (send-visual! @pod {:warnings warnings})
             ; Only send changed files when there are no warnings
             ; As prev is updated only when changes are sent, changes are queued untill they can be sent
