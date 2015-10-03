@@ -19,7 +19,6 @@
   (when before
     (->> (fileset-diff before after :hash)
          output-files
-         (sort-by :dependency-order)
          (map tmp-path))))
 
 (defn- start-server [pod {:keys [ip port ws-host secure?] :as opts}]
