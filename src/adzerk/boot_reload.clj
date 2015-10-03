@@ -122,7 +122,7 @@
                             (send-visual! @pod {:exception (merge {:message (.getMessage e)}
                                                                   (ex-data e))}))
                           (throw e)))]
-          (let [warnings (apply merge (map :adzerk.boot-cljs/warnings (relevant-cljs-edn fileset ids)))]
+          (let [warnings (mapcat :adzerk.boot-cljs/warnings (relevant-cljs-edn fileset ids))]
             (send-visual! @pod {:warnings warnings})
             ; Only send changed files when there are no warnings
             ; As prev is updated only when changes are sent, changes are queued untill they can be sent
