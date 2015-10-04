@@ -6,6 +6,8 @@
 the project change. Communication with the client is via websockets.
 
 * Provides the `reload` task
+* Reload client can show warnings and exceptions from ClojureScript build on **heads-up display**.
+    * Requires `[adzerk/boot-cljs "1.7.48-5"]`
 
 ## Usage
 
