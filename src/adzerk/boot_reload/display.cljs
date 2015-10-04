@@ -106,7 +106,7 @@
     (dom/appendChild js/document.body el)
     (timer/callOnce show! transition-duration)
     (when no-prob?
-      (timer/callOnce hide! (* transition-duration 3)))))
+      (timer/callOnce hide! (* transition-duration 5)))))
 
 (defn gen-id []
   (str "boot-reload-hud-" (name (gensym))))
