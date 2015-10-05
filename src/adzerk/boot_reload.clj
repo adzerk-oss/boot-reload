@@ -34,9 +34,9 @@
   (->> (template
          ((ns adzerk.boot-reload
             (:require
-             [adzerk.boot-reload.client :as client]
+             [figwheel.client :as client]
              ~@(when on-jsload [(symbol (namespace on-jsload))])))
-          (client/connect ~url {:on-jsload #(~(or on-jsload '+))})))
+          (client/start {:websocket-url ~url :on-jsload #(~(or on-jsload '+))})))
     (map pr-str) (interpose "\n") (apply str) (spit f)))
 
 (defn- send-visual! [pod messages]

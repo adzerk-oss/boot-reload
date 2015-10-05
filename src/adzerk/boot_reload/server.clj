@@ -22,14 +22,22 @@
 
 (defn send-visual! [messages]
   (doseq [[channel _] @clients]
-    (http/send! channel (pr-str (merge {:type :visual}
-                                       messages)))))
+    (if (:warnings messages)
+      (doseq [message (:warnings messages)]
+        (http/send! channel (pr-str {:msg-name :compile-warning
+                                     :message (:message message)})))
+      (http/send! channel (pr-str {:msg-name :compile-failed
+                                   :exception-data {:message (-> messages :exception :message)}})))))
 
 (defn send-changed! [tgt-path asset-path changed]
   (doseq [[channel {:keys [protocol]}] @clients]
     (http/send! channel
-      (pr-str {:type :reload
-               :files (map #(web-path protocol % tgt-path asset-path) changed)}))))
+      (pr-str {:msg-name :files-changed
+               :files (map (fn [path]
+                             (let [path (web-path protocol path tgt-path asset-path)]
+                               {:namespace (-> path (string/replace #"^.*\.out/" "") (string/replace #"\.js" "") (string/replace #"\/" "."))
+                                :file path}))
+                           changed)}))))
 
 (defmulti handle-message (fn [channel message] (:type message)))
 
