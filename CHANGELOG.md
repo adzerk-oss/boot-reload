@@ -1,3 +1,8 @@
+## 0.4.1 (11.10.2015)
+
+- Cap maximum HUD height
+- Guard against cases where HUD container is removed from DOM
+
 ## 0.4.0 (4.10.2015)
 
 - Added HUD
