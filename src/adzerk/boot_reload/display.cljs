@@ -118,7 +118,9 @@
 (defn display [messages opts]
   (swap! current-container
          (fn [container]
-           (when container (remove-container! container))
+           (when container
+             (try (remove-container! container)
+                  (catch js/Error _)))
            (let [id (gen-id)]
              (insert-container! id messages)
              id))))
