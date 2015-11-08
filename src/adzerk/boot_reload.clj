@@ -15,12 +15,13 @@
 (defn- make-pod []
   (future (-> (get-env) (update-in [:dependencies] into deps) pod/make-pod)))
 
-(defn- changed [before after]
+(defn- changed [before after static-files]
   (when before
     (->> (fileset-diff before after :hash)
          output-files
          (sort-by :dependency-order)
-         (map tmp-path))))
+         (map tmp-path)
+         (remove static-files))))
 
 (defn- start-server [pod {:keys [ip port ws-host secure?] :as opts}]
   (let [{:keys [ip port]} (pod/with-call-in pod (adzerk.boot-reload.server/start ~opts))
@@ -122,11 +123,16 @@
                             (send-visual! @pod {:exception (merge {:message (.getMessage e)}
                                                                   (ex-data e))}))
                           (throw e)))]
-          (let [warnings (mapcat :adzerk.boot-cljs/warnings (relevant-cljs-edn fileset ids))]
+          (let [cljs-edn (relevant-cljs-edn fileset ids)
+                warnings (mapcat :adzerk.boot-cljs/warnings cljs-edn)
+                static-files (->> cljs-edn
+                                  (map b/tmp-path)
+                                  (map(fn [x] (clojure.string/replace x #"\.cljs\.edn$" ".js")))
+                                  set)]
             (send-visual! @pod {:warnings warnings})
             ; Only send changed files when there are no warnings
             ; As prev is updated only when changes are sent, changes are queued untill they can be sent
             (when (empty? warnings)
-              (send-changed! @pod asset-path (changed @prev fileset))
+              (send-changed! @pod asset-path (changed @prev fileset static-files))
               (reset! prev fileset))
             fileset))))))

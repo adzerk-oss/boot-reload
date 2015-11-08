@@ -1,3 +1,7 @@
+## Unreleased
+
+- Do not try reloading the main shim file [#46](https://github.com/adzerk-oss/boot-reload/issues/46)
+
 ## 0.4.1 (11.10.2015)
 
 - Cap maximum HUD height
