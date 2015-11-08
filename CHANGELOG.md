@@ -1,4 +1,4 @@
-## Unreleased
+## 0.4.2 (8.11.2015)
 
 - Do not try reloading the main shim file [#46](https://github.com/adzerk-oss/boot-reload/issues/46)
 - Fixed asset-path for non-root uses [#43](https://github.com/adzerk-oss/boot-reload/issues/43)
