@@ -15,9 +15,10 @@
 
 (defn web-path [protocol rel-path tgt-path asset-path]
   (if-not (= "file:" protocol)
-    (if asset-path
-      (string/replace rel-path (re-pattern (str "^" (string/replace asset-path #"^/" "") "/")) "")
-      (str "/" rel-path))
+    (str "/"
+      (if asset-path
+        (string/replace rel-path (re-pattern (str "^" (string/replace asset-path #"^/" "") "/")) "")
+        rel-path))
     (.getCanonicalPath (io/file tgt-path rel-path))))
 
 (defn send-visual! [messages]
