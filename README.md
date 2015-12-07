@@ -16,7 +16,7 @@ Add dependency to `build.boot` and `require` the task:
 ```clj
 (set-env! :dependencies '[[adzerk/boot-reload "X.Y.Z" :scope "test"]])
 
-(require '[adzerk.boot-reload :refer [reload])
+(require '[adzerk.boot-reload :refer [reload]])
 ```
 
 Add the task to your development pipeline **before `(cljs ...)`**:
