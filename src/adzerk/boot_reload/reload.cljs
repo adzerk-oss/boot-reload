@@ -64,9 +64,10 @@
   (.groupEnd js/console))
 
 (defn reload [changed opts]
-  (group-log "Reload" changed)
-  (doto changed
-    (reload-js opts)
-    reload-html
-    reload-css
-    reload-img))
+  (let [changed* (map #(str (:asset-host opts) %) changed)]
+    (group-log "Reload" changed*)
+    (doto changed*
+      (reload-js opts)
+      reload-html
+      reload-css
+      reload-img)))
