@@ -41,10 +41,10 @@
                            :or {on-jsload identity}}]
   (let [js-files (filter #(ends-with? % ".js") changed)]
     (when (seq js-files)
-      (-> #(-> % guri/parse .makeUnique jsloader/load)
+      (-> #(-> % guri/parse .makeUnique)
         (map js-files)
         clj->js
-        deferred-list/gatherResults
+        (jsloader/loadMany)
         (.addCallbacks
           (fn [& _] (on-jsload))
           (fn [e] (.error js/console "Load failed:" (.-message e)))))
