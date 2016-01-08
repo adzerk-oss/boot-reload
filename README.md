@@ -1,4 +1,4 @@
-# boot-reload
+# boot-reload [![Downloads](https://jarkeeper.com/adzerk/boot-reload/downloads.svg)](https://jarkeeper.com/adzerk/boot-reload) [![Dependencies Status](https://jarkeeper.com/adzerk/boot-reload/status.svg)](https://jarkeeper.com/adzerk/boot-reload)
 
 [![Clojars Project][2]][3]
 
