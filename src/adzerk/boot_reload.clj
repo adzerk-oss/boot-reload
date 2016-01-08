@@ -30,14 +30,15 @@
     (util/with-let [url (format "%s://%s:%d" proto host port)]
       (util/info "Starting reload server on %s\n" url))))
 
-(defn- write-cljs! [f url on-jsload]
+(defn- write-cljs! [f url on-jsload asset-host]
   (util/info "Writing %s...\n" (.getName f))
   (->> (template
          ((ns adzerk.boot-reload
             (:require
              [adzerk.boot-reload.client :as client]
              ~@(when on-jsload [(symbol (namespace on-jsload))])))
-          (client/connect ~url {:on-jsload #(~(or on-jsload '+))})))
+          (client/connect ~url {:on-jsload #(~(or on-jsload '+))
+                                :asset-host ~asset-host})))
     (map pr-str) (interpose "\n") (apply str) (spit f)))
 
 (defn- send-visual! [pod messages]
@@ -87,13 +88,16 @@
   emacsclient -n +%s:%s %s"
 
   [b ids BUILD_IDS #{str} "Only inject reloading into these builds (= .cljs.edn files)"
-   i ip ADDR         str  "The (optional) IP address for the websocket server to listen on."
-   p port PORT       int  "The (optional) port the websocket server listens on."
-   w ws-host WSADDR  str  "The (optional) websocket host address to pass to clients."
-   j on-jsload SYM   sym  "The (optional) callback to call when JS files are reloaded."
-   a asset-path PATH str  "The (optional) asset-path. This is removed from the start of reloaded urls."
+   ;; Websocket Server
+   i ip ADDR         str  "The IP address for the websocket server to listen on. (optional)"
+   p port PORT       int  "The port the websocket server listens on. (optional)"
+   w ws-host WSADDR  str  "The websocket host address to pass to clients. (optional)"
    s secure          bool "Flag to indicate whether the client should connect via wss. Defaults to false."
-   o open-file COMMAND str "The (optional) command to run when warning or exception is clicked on HUD. Passed to format."]
+   ;; Other Configuration
+   j on-jsload SYM     sym "The callback to call when JS files are reloaded. (optional)"
+   _ asset-host HOST   str "The asset-host where to load files from. Defaults to host of opened page. (optional)"
+   a asset-path PATH   str "The asset-path. This is removed from the start of reloaded urls. (optional)"
+   o open-file COMMAND str "The command to run when warning or exception is clicked on HUD. Passed to format. (optional)"]
 
   (let [pod  (make-pod)
         src  (tmp-dir!)
@@ -104,7 +108,7 @@
         url  (start-server @pod {:ip ip :port port :ws-host ws-host :secure? secure
                                  :open-file open-file})]
     (set-env! :source-paths #(conj % (.getPath src)))
-    (write-cljs! out url on-jsload)
+    (write-cljs! out url on-jsload asset-host)
     (fn [next-task]
       (fn [fileset]
         (pod/with-call-in @pod
