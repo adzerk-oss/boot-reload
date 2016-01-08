@@ -33,7 +33,7 @@ Add the task to your development pipeline **before `(cljs ...)`**:
 You can see the options available on the command line:
 
 ```bash
-boot reload -h
+boot reload --help
 ```
 
 or in the REPL:
@@ -44,8 +44,7 @@ boot.user=> (doc reload)
 
 ## Examples
 
-For in-depth, up-to-date examples of how to use `reload` in
-development, see
+For in-depth, up-to-date examples of how to use `reload` in development, see
 [Boot templates and example projects](https://github.com/clojure/clojurescript/wiki#boot)
 in the ClojureScript wiki.
 
