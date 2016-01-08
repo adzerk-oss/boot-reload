@@ -51,7 +51,8 @@ in the ClojureScript wiki.
 
 ## License
 
-Copyright © 2014 Adzerk
+Copyright &copy; 2014 Adzerk
+Copyright &copy; 2015-2015 Juho Teperi
 
 Distributed under the Eclipse Public License either version 1.0 or (at
 your option) any later version.
