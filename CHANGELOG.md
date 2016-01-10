@@ -1,3 +1,12 @@
+## 0.4.3 (10.1.2015)
+
+**[compare](https://github.com/adzerk-oss/boot-reload/compare/0.4.2...0.4.3)**
+
+- Added `asset-host` option. It can be used to manually set where the changed files
+are reloaded. ([#51](https://github.com/adzerk-oss/boot-reload/issues/51),
+[#54](https://github.com/adzerk-oss/boot-reload/issues/54))
+- Increased HUD `z-index`.
+
 ## 0.4.2 (8.11.2015)
 
 **[compare](https://github.com/adzerk-oss/boot-reload/compare/0.4.1...0.4.2)**
