@@ -1,14 +1,20 @@
 ## 0.4.2 (8.11.2015)
 
+**[compare](https://github.com/adzerk-oss/boot-reload/compare/0.4.1...0.4.2)**
+
 - Do not try reloading the main shim file [#46](https://github.com/adzerk-oss/boot-reload/issues/46)
 - Fixed asset-path for non-root uses [#43](https://github.com/adzerk-oss/boot-reload/issues/43)
 
 ## 0.4.1 (11.10.2015)
 
+**[compare](https://github.com/adzerk-oss/boot-reload/compare/0.4.0...0.4.1)**
+
 - Cap maximum HUD height
 - Guard against cases where HUD container is removed from DOM
 
 ## 0.4.0 (4.10.2015)
+
+**[compare](https://github.com/adzerk-oss/boot-reload/compare/0.3.2...0.4.0)**
 
 - Added HUD
     - **Requires**: `[adzerk/boot-cljs "1.7.48.5"]`
