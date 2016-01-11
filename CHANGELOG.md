@@ -1,7 +1,14 @@
+## 0.4.4 (11.1.2015)
+
+**[compare](https://github.com/adzerk-oss/boot-reload/compare/0.4.3...0.4.4)**
+
+- Fixed build
+
 ## 0.4.3 (10.1.2015)
 
 **[compare](https://github.com/adzerk-oss/boot-reload/compare/0.4.2...0.4.3)**
 
+- **Broken release**
 - Added `asset-host` option. It can be used to manually set where the changed files
 are reloaded. ([#51](https://github.com/adzerk-oss/boot-reload/issues/51),
 [#54](https://github.com/adzerk-oss/boot-reload/issues/54))
