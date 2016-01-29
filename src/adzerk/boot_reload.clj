@@ -98,7 +98,7 @@
    _ asset-host HOST   str "The asset-host where to load files from. Defaults to host of opened page. (optional)"
    a asset-path PATH   str "The asset-path. This is removed from the start of reloaded urls. (optional)"
    o open-file COMMAND str "The command to run when warning or exception is clicked on HUD. Passed to format. (optional)"
-   v disabled-hud      bool "Toggle to disable HUD. Defaults to false (visible)."]
+   v disable-hud      bool "Toggle to disable HUD. Defaults to false (visible)."]
 
   (let [pod  (make-pod)
         src  (tmp-dir!)
@@ -124,7 +124,7 @@
               fileset (try
                         (next-task fileset)
                         (catch Exception e
-                          (if (and (= :boot-cljs (:from (ex-data e))) (not disabled-hud))
+                          (if (and (= :boot-cljs (:from (ex-data e))) (not disable-hud))
                             (send-visual! @pod {:exception (merge {:message (.getMessage e)}
                                                                   (ex-data e))}))
                           (throw e)))]
@@ -134,7 +134,7 @@
                                   (map b/tmp-path)
                                   (map(fn [x] (clojure.string/replace x #"\.cljs\.edn$" ".js")))
                                   set)]
-            (if-not disabled-hud
+            (if-not disable-hud
               (send-visual! @pod {:warnings warnings}))
             ; Only send changed files when there are no warnings
             ; As prev is updated only when changes are sent, changes are queued untill they can be sent
