@@ -24,7 +24,8 @@
 
 (defmethod handle :visual
   [state opts]
-  (d/display state opts))
+  (when (rl/has-dom?)
+    (d/display state opts)))
 
 (defn connect [url & [opts]]
   (when-not (alive?)

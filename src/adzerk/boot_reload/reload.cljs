@@ -63,11 +63,19 @@
   (doseq [t things-to-log] (.log js/console t))
   (.groupEnd js/console))
 
+(defn has-dom?
+  "Perform heuristics to check if a non-shimmed DOM is available"
+  []
+  (and (exists? js/window)
+       (exists? js/window.document)
+       (exists? js/window.document.documentURI)))
+
 (defn reload [changed opts]
   (let [changed* (map #(str (:asset-host opts) %) changed)]
     (group-log "Reload" changed*)
-    (doto changed*
-      (reload-js opts)
-      reload-html
-      reload-css
-      reload-img)))
+    (reload-js changed* opts)
+    (when (has-dom?)
+      (doto changed*
+        reload-html
+        reload-css
+        reload-img))))
