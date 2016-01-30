@@ -1,3 +1,10 @@
+## Unreleased
+
+- Fixed use with React Native ([#58](https://github.com/adzerk-oss/boot-reload/pull/58))
+- Added `disable-hud` option ([#55](https://github.com/adzerk-oss/boot-reload/pull/55))
+- Load changed JS files in strict order ([#53](https://github.com/adzerk-oss/boot-reload/pull/53))
+    - This might make reload a bit slower, but will guarantee that files are evaluated in dependency order
+
 ## 0.4.4 (11.1.2015)
 
 **[compare](https://github.com/adzerk-oss/boot-reload/compare/0.4.3...0.4.4)**
