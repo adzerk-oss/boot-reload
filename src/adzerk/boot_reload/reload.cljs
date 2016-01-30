@@ -5,7 +5,8 @@
    [goog.async.DeferredList :as deferred-list]
    [goog.net.jsloader       :as jsloader]))
 
-(def ^:private page-uri (goog.Uri. (.. js/window -location -href)))
+(defn- page-uri []
+  (goog.Uri. (.. js/window -location -href)))
 
 (defn- ends-with? [s pat]
   (= pat (subs s (- (count s) (count pat)))))
@@ -15,7 +16,7 @@
 
 (defn- normalize-href-or-uri [href-or-uri]
   (let [uri  (goog.Uri. href-or-uri)]
-    (.getPath (.resolve page-uri uri))))
+    (.getPath (.resolve (page-uri) uri))))
 
 (defn- changed-href? [href-or-uri changed]
   (when href-or-uri
@@ -52,7 +53,7 @@
         (.trigger (js/jQuery js/document) "page-load")))))
 
 (defn- reload-html [changed]
-  (let [page-path (.getPath page-uri)
+  (let [page-path (.getPath (page-uri))
         html-path (if (ends-with? page-path "/")
                     (str page-path "index.html")
                     page-path)]
