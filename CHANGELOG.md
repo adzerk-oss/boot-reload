@@ -1,4 +1,6 @@
-## Unreleased
+## 0.4.5 (31.1.2016)
+
+**[compare](https://github.com/adzerk-oss/boot-reload/compare/0.4.4...0.4.5)**
 
 - Fixed use with React Native ([#58](https://github.com/adzerk-oss/boot-reload/pull/58))
 - Added `disable-hud` option ([#55](https://github.com/adzerk-oss/boot-reload/pull/55))
