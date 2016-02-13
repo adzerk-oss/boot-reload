@@ -5,10 +5,10 @@
                   [boot/core           "2.5.5"     :scope "provided"]
                   [http-kit            "2.1.19"    :scope "test"]])
 
-(def +version+ "0.4.5")
+(def +version+ "0.4.6-SNAPSHOT")
 
 (task-options!
-  pom {:project     'adzerk/boot-reload
+  pom {:project     'pandeiro/boot-reload
        :version     +version+
        :description "Boot task to automatically reload page resources in the browser."
        :url         "https://github.com/adzerk/boot-reload"
