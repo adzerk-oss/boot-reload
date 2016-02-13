@@ -44,7 +44,7 @@
                 protocol    (.getScheme passed-uri)
                 host        (or ~ws-host (.-hostname (.-location js/window)))
                 port        (.getPort passed-uri)
-                url         (str proto "://" host ":" port)]
+                url         (str protocol "://" host ":" port)]
             (client/connect url {:on-jsload #(~(or on-jsload '+))
                                  :asset-host ~asset-host}))))
     (map pr-str) (interpose "\n") (apply str) (spit f)))
