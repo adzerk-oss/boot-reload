@@ -30,15 +30,17 @@
     (util/with-let [url (format "%s://%s:%d" proto host port)]
       (util/info "Starting reload server on %s\n" url))))
 
-(defn- write-cljs! [f url on-jsload asset-host]
-  (util/info "Writing %s...\n" (.getName f))
+(defn- write-cljs! [f url ws-host on-jsload asset-host]
+  (util/info "Writing %s to connect to %s...\n" (.getName f)
+             (if ws-host url "default websocket host"))
   (->> (template
          ((ns adzerk.boot-reload
             (:require
              [adzerk.boot-reload.client :as client]
              ~@(when on-jsload [(symbol (namespace on-jsload))])))
           (client/connect ~url {:on-jsload #(~(or on-jsload '+))
-                                :asset-host ~asset-host})))
+                                :asset-host ~asset-host
+                                :ws-host ~ws-host})))
     (map pr-str) (interpose "\n") (apply str) (spit f)))
 
 (defn- send-visual! [pod messages]
@@ -91,7 +93,7 @@
    ;; Websocket Server
    i ip ADDR         str  "The IP address for the websocket server to listen on. (optional)"
    p port PORT       int  "The port the websocket server listens on. (optional)"
-   w ws-host WSADDR  str  "The websocket host address to pass to clients. (optional)"
+   w ws-host WSADDR  str  "The websocket host clients connect to. Defaults to current host. (optional)"
    s secure          bool "Flag to indicate whether the client should connect via wss. Defaults to false."
    ;; Other Configuration
    j on-jsload SYM     sym "The callback to call when JS files are reloaded. (optional)"
@@ -109,7 +111,7 @@
         url  (start-server @pod {:ip ip :port port :ws-host ws-host :secure? secure
                                  :open-file open-file})]
     (set-env! :source-paths #(conj % (.getPath src)))
-    (write-cljs! out url on-jsload asset-host)
+    (write-cljs! out url ws-host on-jsload asset-host)
     (fn [next-task]
       (fn [fileset]
         (pod/with-call-in @pod

@@ -7,7 +7,9 @@
    [clojure.browser.net          :as net]
    [clojure.browser.event        :as event]
    [cljs.reader                  :as reader]
-   [goog.net.jsloader            :as jsloader]))
+   [goog.net.jsloader            :as jsloader])
+  (:import
+   goog.Uri))
 
 ;; Thanks, lein-figwheel & lively!
 (defn patch-goog-base! []
@@ -15,6 +17,13 @@
   (set! (.-CLOSURE_IMPORT_SCRIPT (.-global js/goog)) (fn [file]
                                                        (when (.inHtmlDocument_ js/goog)
                                                          (jsloader/load file)))))
+
+(defn resolve-url [url ws-host]
+  (let [passed-uri (Uri. url)
+        protocol   (.getScheme passed-uri)
+        host       (or ws-host (.-hostname (.-location js/window)))
+        port       (.getPort passed-uri)]
+    (str protocol "://" host ":" port)))
 
 (defmulti handle (fn [msg opts] (:type msg)))
 
@@ -53,4 +62,4 @@
         (fn [evt]
           (.error js/console "Reload websocket error:" evt)))
 
-      (net/connect conn url))))
+      (net/connect conn (resolve-url url (:ws-host opts))))))
