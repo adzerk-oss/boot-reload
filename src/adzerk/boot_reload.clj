@@ -37,15 +37,10 @@
          ((ns adzerk.boot-reload
             (:require
              [adzerk.boot-reload.client :as client]
-             ~@(when on-jsload [(symbol (namespace on-jsload))]))
-            (:import goog.Uri))
-          (let [passed-uri  (Uri. ~url)
-                protocol    (.getScheme passed-uri)
-                host        (or ~ws-host (.-hostname (.-location js/window)))
-                port        (.getPort passed-uri)
-                url         (str protocol "://" host ":" port)]
-            (client/connect url {:on-jsload #(~(or on-jsload '+))
-                                 :asset-host ~asset-host}))))
+             ~@(when on-jsload [(symbol (namespace on-jsload))])))
+          (client/connect ~url {:on-jsload #(~(or on-jsload '+))
+                                :asset-host ~asset-host
+                                :ws-host ~ws-host})))
     (map pr-str) (interpose "\n") (apply str) (spit f)))
 
 (defn- send-visual! [pod messages]
