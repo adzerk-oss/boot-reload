@@ -27,9 +27,8 @@
   (let [{:keys [ip port]} (pod/with-call-in pod (adzerk.boot-reload.server/start ~opts))
         host              (cond ws-host ws-host (= ip "0.0.0.0") "localhost" :else ip)
         proto             (if secure? "wss" "ws")]
-    [(util/with-let [url (format "%s://%s:%d" proto host port)]
-       (util/info "Starting reload server on %s\n" url))
-     ws-host]))
+    (util/with-let [url (format "%s://%s:%d" proto host port)]
+      (util/info "Starting reload server on %s\n" url))))
 
 (defn- write-cljs! [f url ws-host on-jsload asset-host]
   (util/info "Writing %s to connect to %s...\n" (.getName f)
@@ -114,8 +113,8 @@
         prev-pre (atom nil)
         prev (atom nil)
         out  (doto (io/file src "adzerk" "boot_reload.cljs") io/make-parents)
-        [url ws-host] (start-server @pod {:ip ip :port port :ws-host ws-host :secure? secure
-                                    :open-file open-file})]
+        url  (start-server @pod {:ip ip :port port :ws-host ws-host :secure? secure
+                                 :open-file open-file})]
     (set-env! :source-paths #(conj % (.getPath src)))
     (write-cljs! out url ws-host on-jsload asset-host)
     (fn [next-task]
