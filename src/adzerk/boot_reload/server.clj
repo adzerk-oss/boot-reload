@@ -13,24 +13,30 @@
 (defn set-options [opts]
   (reset! options opts))
 
-(defn web-path [protocol rel-path tgt-path asset-path]
-  (if-not (= "file:" protocol)
-    (str "/"
-      (if asset-path
-        (string/replace rel-path (re-pattern (str "^" (string/replace asset-path #"^/" "") "/")) "")
-        rel-path))
-    (.getCanonicalPath (io/file tgt-path rel-path))))
+(defn web-path
+  ([rel-path] (web-path {} rel-path))
+  ([opts rel-path]
+   (let [{:keys [protocol target-path asset-path cljs-asset-path]} opts]
+     (if (= "file:" protocol)
+       (.getCanonicalPath (io/file target-path rel-path))
+       (str
+        (if cljs-asset-path (str cljs-asset-path "/") "")
+        (string/replace rel-path
+                        (re-pattern (str "^" (string/replace (or asset-path "") #"^/" "") "/"))
+                        ""))))))
 
 (defn send-visual! [messages]
   (doseq [[channel _] @clients]
     (http/send! channel (pr-str (merge {:type :visual}
                                        messages)))))
 
-(defn send-changed! [tgt-path asset-path changed]
-  (doseq [[channel {:keys [protocol]}] @clients]
-    (http/send! channel
-      (pr-str {:type :reload
-               :files (map #(web-path protocol % tgt-path asset-path) changed)}))))
+(defn send-changed!
+  ([changed] (send-changed! {} changed))
+  ([opts changed]
+   (doseq [[channel {:keys [protocol]}] @clients]
+     (http/send! channel
+                 (pr-str {:type :reload
+                          :files (map #(web-path (assoc opts :protocol protocol) %) changed)})))))
 
 (defmulti handle-message (fn [channel message] (:type message)))
 

@@ -49,12 +49,13 @@
       (adzerk.boot-reload.server/send-visual!
         ~messages))))
 
-(defn- send-changed! [pod asset-path changed]
+(defn- send-changed! [pod asset-path cljs-asset-path changed]
   (when-not (empty? changed)
     (pod/with-call-in pod
       (adzerk.boot-reload.server/send-changed!
-        ~(get-env :target-path)
-        ~asset-path
+       {:target-path ~(get-env :target-path)
+        :asset-path ~asset-path
+        :cljs-asset-path ~cljs-asset-path}
         ~changed))))
 
 (defn- add-init!
@@ -98,7 +99,8 @@
    ;; Other Configuration
    j on-jsload SYM     sym "The callback to call when JS files are reloaded. (optional)"
    _ asset-host HOST   str "The asset-host where to load files from. Defaults to host of opened page. (optional)"
-   a asset-path PATH   str "The asset-path. This is removed from the start of reloaded urls. (optional)"
+   a asset-path PATH   str "Sets the output directory for temporary files used during compilation. (optional)"
+   c cljs-asset-path PATH str "The actual asset path. This is added to the start of reloaded urls. (optional)"
    o open-file COMMAND str "The command to run when warning or exception is clicked on HUD. Passed to format. (optional)"
    v disable-hud      bool "Toggle to disable HUD. Defaults to false (visible)."]
 
@@ -141,6 +143,6 @@
             ; Only send changed files when there are no warnings
             ; As prev is updated only when changes are sent, changes are queued untill they can be sent
             (when (empty? warnings)
-              (send-changed! @pod asset-path (changed @prev fileset static-files))
+              (send-changed! @pod asset-path cljs-asset-path (changed @prev fileset static-files))
               (reset! prev fileset))
             fileset))))))
