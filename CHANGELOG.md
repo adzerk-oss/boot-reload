@@ -1,3 +1,8 @@
+## Unreleased
+
+- Default to current host if `ws-host` is not set ([#62](https://github.com/adzerk-oss/boot-reload/pull/62))
+- Add new `cljs-asset-path` option to prepend a path before URL ([#65](https://github.com/adzerk-oss/boot-reload/pull/65))
+
 ## 0.4.5 (31.1.2016)
 
 **[compare](https://github.com/adzerk-oss/boot-reload/compare/0.4.4...0.4.5)**
