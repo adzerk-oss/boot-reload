@@ -22,4 +22,11 @@
            (web-path {:protocol "http:"
                       :asset-path "resources/public/js/saapas.out"
                       :cljs-asset-path "js/saapas.out"}
-                     "resources/public/js/saapas.out/saapas/core.js")))))
+                     "resources/public/js/saapas.out/saapas/core.js"))))
+  
+  (testing "windows style paths"
+    (is (= "js/saapas.out/saapas/core.js"
+           (web-path {:protocol "http:"
+                      :asset-path "resources/public/js/saapas.out"
+                      :cljs-asset-path "js/saapas.out"}
+                     "resources\\public\\js\\saapas.out\\saapas\\core.js")))))
