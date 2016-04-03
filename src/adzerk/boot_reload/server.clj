@@ -16,7 +16,9 @@
 (defn web-path
   ([rel-path] (web-path {} rel-path))
   ([opts rel-path]
-   (let [{:keys [protocol target-path asset-path cljs-asset-path]} opts]
+   ; windows fix, convert \ characters to / in rel-path
+   (let [rel-path (string/replace rel-path #"\\" "/")
+         {:keys [protocol target-path asset-path cljs-asset-path]} opts]
      (if (= "file:" protocol)
        (.getCanonicalPath (io/file target-path rel-path))
        (str
