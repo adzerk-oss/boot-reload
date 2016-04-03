@@ -4,7 +4,7 @@
   :dependencies '[[org.clojure/clojure "1.7.0"     :scope "provided"]
                   [boot/core           "2.5.5"     :scope "provided"]
                   [http-kit            "2.1.19"    :scope "test"]
-                  [adzerk/boot-test    "1.0.7"     :scope "test"]])
+                  [adzerk/boot-test    "1.1.0"     :scope "test"]])
 
 (require '[adzerk.boot-test :refer [test]])
 
