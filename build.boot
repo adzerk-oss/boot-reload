@@ -5,7 +5,7 @@
                   [boot/core           "2.5.5"     :scope "provided"]
                   [http-kit            "2.1.19"    :scope "test"]])
 
-(def +version+ "0.4.6")
+(def +version+ "0.4.7-SNAPSHOT")
 
 (task-options!
   pom {:project     'adzerk/boot-reload
