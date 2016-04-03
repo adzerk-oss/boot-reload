@@ -3,7 +3,10 @@
   :source-paths #{"test"}
   :dependencies '[[org.clojure/clojure "1.7.0"     :scope "provided"]
                   [boot/core           "2.5.5"     :scope "provided"]
-                  [http-kit            "2.1.19"    :scope "test"]])
+                  [http-kit            "2.1.19"    :scope "test"]
+                  [adzerk/boot-test    "1.0.7"     :scope "test"]])
+
+(require '[adzerk.boot-test :refer [test]])
 
 (def +version+ "0.4.7-SNAPSHOT")
 
@@ -26,3 +29,7 @@
   (comp
    (build)
    (push :repo "clojars" :gpg-sign (not (.endsWith +version+ "-SNAPSHOT")))))
+
+(deftask run-tests []
+  (comp
+    (test :namespaces #{'adzerk.boot-reload.server-test})))
