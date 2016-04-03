@@ -1,3 +1,7 @@
+## 0.4.7 (3.4.2016)
+
+- Fixed URIs in Windows ([#71](https://github.com/adzerk-oss/boot-reload/pull/71))
+
 ## 0.4.6 (24.3.2016)
 
 - Default to current host if `ws-host` is not set ([#62](https://github.com/adzerk-oss/boot-reload/pull/62))
