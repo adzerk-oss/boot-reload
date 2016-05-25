@@ -25,14 +25,14 @@
 
 (defn- start-server [pod {:keys [ip port ws-host ws-port secure?] :as opts}]
   (let [{:keys [ip port]} (pod/with-call-in pod (adzerk.boot-reload.server/start ~opts))
-        host              (cond ws-host ws-host (= ip "0.0.0.0") "localhost" :else ip)
+        listen-host       (cond (= ip "0.0.0.0") "localhost" :else ip)
+        client-host       (cond ws-host ws-host (= ip "0.0.0.0") "localhost" :else ip)
         proto             (if secure? "wss" "ws")]
-    (util/with-let [url (format "%s://%s:%d" proto host (or ws-port port))]
-      (util/info "Starting reload server on %s\n" url))))
+    (util/info "Starting reload server on %s\n" (format "%s://%s:%d" proto listen-host port))
+    (format "%s://%s:%d" proto client-host (or ws-port port))))
 
 (defn- write-cljs! [f url ws-host on-jsload asset-host]
-  (util/info "Writing %s to connect to %s...\n" (.getName f)
-             (if ws-host url "default websocket host"))
+  (util/info "Writing %s to connect to %s...\n" (.getName f) url)
   (->> (bt/template
          ((ns adzerk.boot-reload
             (:require
