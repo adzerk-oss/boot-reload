@@ -1,3 +1,8 @@
+## 0.4.8 (25.5.2016)
+
+- Fixed Boot 2.6 compatibility
+- Added `ws-port` option ([#73](https://github.com/adzerk-oss/boot-reload/pull/73)) to set WS port for the client
+
 ## 0.4.7 (3.4.2016)
 
 - Fixed URIs in Windows ([#71](https://github.com/adzerk-oss/boot-reload/pull/71))
