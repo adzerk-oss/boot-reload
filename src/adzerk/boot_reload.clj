@@ -8,7 +8,7 @@
    [boot.file          :as file]
    [boot.util          :as util]
    [boot.core          :refer :all]
-   [boot.from.backtick :refer [template]]))
+   [boot.from.backtick :as bt]))
 
 (def ^:private deps '[[http-kit "2.1.18"]])
 
@@ -33,7 +33,7 @@
 (defn- write-cljs! [f url ws-host on-jsload asset-host]
   (util/info "Writing %s to connect to %s...\n" (.getName f)
              (if ws-host url "default websocket host"))
-  (->> (template
+  (->> (bt/template
          ((ns adzerk.boot-reload
             (:require
              [adzerk.boot-reload.client :as client]
