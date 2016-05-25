@@ -3,14 +3,20 @@
 - Fixed Boot 2.6 compatibility
 - Added `ws-port` option ([#73](https://github.com/adzerk-oss/boot-reload/pull/73)) to set WS port for the client
 
+**[compare](https://github.com/adzerk-oss/boot-reload/compare/0.4.7...0.4.8)**
+
 ## 0.4.7 (3.4.2016)
 
 - Fixed URIs in Windows ([#71](https://github.com/adzerk-oss/boot-reload/pull/71))
+
+**[compare](https://github.com/adzerk-oss/boot-reload/compare/0.4.6...0.4.7)**
 
 ## 0.4.6 (24.3.2016)
 
 - Default to current host if `ws-host` is not set ([#62](https://github.com/adzerk-oss/boot-reload/pull/62))
 - Add new `cljs-asset-path` option to prepend a path before URL ([#65](https://github.com/adzerk-oss/boot-reload/pull/65))
+
+**[compare](https://github.com/adzerk-oss/boot-reload/compare/0.4.5...0.4.6)**
 
 ## 0.4.5 (31.1.2016)
 
