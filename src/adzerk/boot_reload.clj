@@ -103,7 +103,8 @@
    a asset-path PATH   str "Sets the output directory for temporary files used during compilation. (optional)"
    c cljs-asset-path PATH str "The actual asset path. This is added to the start of reloaded urls. (optional)"
    o open-file COMMAND str "The command to run when warning or exception is clicked on HUD. Passed to format. (optional)"
-   v disable-hud      bool "Toggle to disable HUD. Defaults to false (visible)."]
+   v disable-hud      bool "Toggle to disable HUD. Defaults to false (visible)."
+   f force-reload     bool "Toggle to reload sources even when warnings are present."]
 
   (let [pod  (make-pod)
         src  (tmp-dir!)
@@ -144,7 +145,7 @@
               (send-visual! @pod {:warnings warnings}))
             ; Only send changed files when there are no warnings
             ; As prev is updated only when changes are sent, changes are queued untill they can be sent
-            (when (empty? warnings)
+            (when (or (empty? warnings) force-reload)
               (send-changed! @pod asset-path cljs-asset-path (changed @prev fileset static-files))
               (reset! prev fileset))
             fileset))))))
