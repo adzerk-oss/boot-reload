@@ -15,13 +15,18 @@
 (defn- make-pod []
   (future (-> (get-env) (update-in [:dependencies] into deps) pod/make-pod)))
 
-(defn- changed [before after static-files]
-  (when before
-    (->> (fileset-diff before after :hash)
-         output-files
-         (sort-by :dependency-order)
-         (map tmp-path)
-         (remove static-files))))
+(defn- changed [before after only-by-re static-files]
+  (letfn [(maybe-filter-by-re [files]
+            (if only-by-re
+              (by-re only-by-re files)
+              files))]
+    (when before
+      (->> (fileset-diff before after :hash)
+           output-files
+           maybe-filter-by-re
+           (sort-by :dependency-order)
+           (map tmp-path)
+           (remove static-files)))))
 
 (defn- start-server [pod {:keys [ip port ws-host ws-port secure?] :as opts}]
   (let [{:keys [ip port]} (pod/with-call-in pod (adzerk.boot-reload.server/start ~opts))
@@ -31,17 +36,18 @@
     (util/info "Starting reload server on %s\n" (format "%s://%s:%d" proto listen-host port))
     (format "%s://%s:%d" proto client-host (or ws-port port))))
 
-(defn- write-cljs! [f url ws-host on-jsload asset-host]
-  (util/info "Writing %s to connect to %s...\n" (.getName f) url)
-  (->> (bt/template
-         ((ns adzerk.boot-reload
-            (:require
-             [adzerk.boot-reload.client :as client]
-             ~@(when on-jsload [(symbol (namespace on-jsload))])))
-          (client/connect ~url {:on-jsload #(~(or on-jsload '+))
-                                :asset-host ~asset-host
-                                :ws-host ~ws-host})))
-    (map pr-str) (interpose "\n") (apply str) (spit f)))
+(defn- write-cljs! [f ns url ws-host on-jsload asset-host]
+  (util/info "Writing adzerk/boot_reload/%s to connect to %s...\n" (.getName f) url)
+  (let [ns (symbol (str 'adzerk.boot-reload "." ns))]
+    (->> (bt/template
+          ((ns ~ns
+             (:require
+              [adzerk.boot-reload.client :as client]
+              ~@(when on-jsload [(symbol (namespace on-jsload))])))
+           (client/connect ~url {:on-jsload #(~(or on-jsload '+))
+                                 :asset-host ~asset-host
+                                 :ws-host ~ws-host})))
+         (map pr-str) (interpose "\n") (apply str) (spit f))))
 
 (defn- send-visual! [pod messages]
   (when-not (empty? messages)
@@ -59,8 +65,8 @@
         ~changed))))
 
 (defn- add-init!
-  [in-file out-file]
-  (let [ns 'adzerk.boot-reload
+  [ns in-file out-file]
+  (let [ns (symbol (str 'adzerk.boot-reload "." ns))
         spec (-> in-file slurp read-string)]
     (when (not= :nodejs (-> spec :compiler-options :target))
       (util/info "Adding :require %s to %s...\n" ns (.getName in-file))
@@ -103,19 +109,22 @@
    a asset-path PATH   str "Sets the output directory for temporary files used during compilation. (optional)"
    c cljs-asset-path PATH str "The actual asset path. This is added to the start of reloaded urls. (optional)"
    o open-file COMMAND str "The command to run when warning or exception is clicked on HUD. Passed to format. (optional)"
-   v disable-hud      bool "Toggle to disable HUD. Defaults to false (visible)."]
+   v disable-hud      bool "Toggle to disable HUD. Defaults to false (visible)."
+   _ only-by-re REGEXES [regex] "Vector of path regexes (for `boot.core/by-re`) to restrict reloads to only files within these paths (optional)."]
 
-  (let [pod  (make-pod)
+  (let [ns   (name (gensym "init"))
+        pod  (make-pod)
         src  (tmp-dir!)
         tmp  (tmp-dir!)
         prev-pre (atom nil)
         prev (atom nil)
-        out  (doto (io/file src "adzerk" "boot_reload.cljs") io/make-parents)
+        out  (doto (io/file src "adzerk" "boot_reload" (str ns ".cljs"))
+               io/make-parents)
         url  (start-server @pod {:ip ip :port port :ws-host ws-host
                                  :ws-port ws-port :secure? secure
                                  :open-file open-file})]
     (set-env! :source-paths #(conj % (.getPath src)))
-    (write-cljs! out url ws-host on-jsload asset-host)
+    (write-cljs! out ns url ws-host on-jsload asset-host)
     (fn [next-task]
       (fn [fileset]
         (pod/with-call-in @pod
@@ -124,7 +133,7 @@
           (let [path     (tmp-path f)
                 in-file  (tmp-file f)
                 out-file (io/file tmp path)]
-            (add-init! in-file out-file)))
+            (add-init! ns in-file out-file)))
         (reset! prev-pre fileset)
         (let [fileset (-> fileset (add-resource tmp) commit!)
               fileset (try
@@ -145,6 +154,9 @@
             ; Only send changed files when there are no warnings
             ; As prev is updated only when changes are sent, changes are queued untill they can be sent
             (when (empty? warnings)
-              (send-changed! @pod asset-path cljs-asset-path (changed @prev fileset static-files))
+              (send-changed! @pod
+                             asset-path
+                             cljs-asset-path
+                             (changed @prev fileset only-by-re static-files))
               (reset! prev fileset))
             fileset))))))
