@@ -18,24 +18,27 @@
   (let [uri  (goog.Uri. href-or-uri)]
     (.getPath (.resolve (page-uri) uri))))
 
-(defn- changed-href? [href-or-uri changed]
+(defn- changed-uri
+  "Produce the changed goog.Uri iff the (relative) path is different
+  compared to the content of changed (a string). Return nil otherwise."
+  [href-or-uri changed]
   (when href-or-uri
     (let [path (normalize-href-or-uri href-or-uri)]
-      (when (not-empty (filter #(ends-with? (normalize-href-or-uri %) path) changed))
-        (guri/parse path)))))
+      (when-let [changed (first (filter #(ends-with? (normalize-href-or-uri %) path) changed))]
+        (guri/parse changed)))))
 
 (defn- reload-css [changed]
   (let [sheets (.. js/document -styleSheets)]
     (doseq [s (range 0 (.-length sheets))]
       (when-let [sheet (aget sheets s)]
-        (when-let [href-uri (changed-href? (.-href sheet) changed)]
+        (when-let [href-uri (changed-uri (.-href sheet) changed)]
           (set! (.. sheet -ownerNode -href) (.toString (.makeUnique href-uri))))))))
 
 (defn- reload-img [changed]
   (let [images (.. js/document -images)]
     (doseq [s (range 0 (.-length images))]
       (when-let [image (aget images s)]
-        (when-let [href-uri (changed-href? (.-src image) changed)]
+        (when-let [href-uri (changed-uri (.-src image) changed)]
           (set! (.-src image) (.toString (.makeUnique href-uri))))))))
 
 (defn- reload-js [changed {:keys [on-jsload]
@@ -57,7 +60,7 @@
         html-path (if (ends-with? page-path "/")
                     (str page-path "index.html")
                     page-path)]
-    (when (changed-href? html-path changed) (reload-page!))))
+    (when (changed-uri html-path changed) (reload-page!))))
 
 (defn- group-log [title things-to-log]
   (.groupCollapsed js/console title)
