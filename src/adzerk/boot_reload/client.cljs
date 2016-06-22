@@ -23,9 +23,9 @@
         protocol   (.getScheme passed-uri)
         host       (or ws-host
                        (.-hostname (.-location js/window))
-                       (do (js/console.log "Both :ws-host and window.location.hostname are empty."
-                                           "This might happen if you are accessing the files directly instead of over http."
-                                           "You should probably set :ws-host manually.")
+                       (do (js/console.warn "Both :ws-host and window.location.hostname are empty."
+                                            "This might happen if you are accessing the files directly instead of over http."
+                                            "You should probably set :ws-host manually.")
                            nil))
         port       (.getPort passed-uri)]
     (str protocol "://" host ":" port)))
