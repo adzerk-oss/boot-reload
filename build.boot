@@ -1,14 +1,13 @@
 (set-env!
   :resource-paths #{"src"}
   :source-paths #{"test"}
-  :dependencies '[[org.clojure/clojure "1.7.0"     :scope "provided"]
-                  [boot/core           "2.5.5"     :scope "provided"]
+  :dependencies '[[org.clojure/clojure "1.8.0"     :scope "provided"]
                   [http-kit            "2.1.19"    :scope "test"]
                   [adzerk/boot-test    "1.1.0"     :scope "test"]])
 
 (require '[adzerk.boot-test :refer [test]])
 
-(def +version+ "0.4.8")
+(def +version+ "0.4.9")
 
 (task-options!
   pom {:project     'adzerk/boot-reload

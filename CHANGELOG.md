@@ -1,3 +1,10 @@
+## 0.4.9 (22.6.2016)
+
+- Added `:only-by-re` option to control which files should trigger reload ([#70](https://github.com/adzerk-oss/boot-reload/pull/70))
+- Fix reload-css/img through changed-href? ([#80](https://github.com/adzerk-oss/boot-reload/pull/80))
+
+**[compare](https://github.com/adzerk-oss/boot-reload/compare/0.4.7...0.4.8)**
+
 ## 0.4.8 (25.5.2016)
 
 - Fixed Boot 2.6 compatibility
