@@ -22,7 +22,7 @@
      (if (= "file:" protocol)
        (.getCanonicalPath (io/file target-path rel-path))
        (str
-        (if cljs-asset-path (str cljs-asset-path "/") "")
+        cljs-asset-path "/"
         (string/replace rel-path
                         (re-pattern (str "^" (string/replace (or asset-path "") #"^/" "") "/"))
                         ""))))))
