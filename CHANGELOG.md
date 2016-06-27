@@ -1,3 +1,9 @@
+## 0.4.11 (27.6.2016)
+
+- Fix CLJS logo reloading issues with CLJS 1.9.76 and up ([#84](https://github.com/adzerk-oss/boot-reload/pull/84))
+
+**[compare](https://github.com/adzerk-oss/boot-reload/compare/0.4.10...0.4.11)**
+
 ## 0.4.10 (25.6.2016)
 
 - Use absolute paths when reloading files ([#83](https://github.com/adzerk-oss/boot-reload/pull/83))
