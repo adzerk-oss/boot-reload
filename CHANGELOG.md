@@ -1,3 +1,9 @@
+## 0.4.12 (20.7.2016)
+
+- Fix CLJS logo issues with CLJS 1.9.76 and below ([#87](https://github.com/adzerk-oss/boot-reload/issues/87))
+
+**[compare](https://github.com/adzerk-oss/boot-reload/compare/0.4.11...0.4.12)**
+
 ## 0.4.11 (27.6.2016)
 
 - Fix CLJS logo reloading issues with CLJS 1.9.76 and up ([#84](https://github.com/adzerk-oss/boot-reload/pull/84))
