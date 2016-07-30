@@ -55,11 +55,11 @@
       (adzerk.boot-reload.server/send-visual!
         ~messages))))
 
-(defn- send-changed! [pod asset-path cljs-asset-path changed]
+(defn- send-changed! [pod asset-path cljs-asset-path target-path changed]
   (when-not (empty? changed)
     (pod/with-call-in pod
       (adzerk.boot-reload.server/send-changed!
-       {:target-path ~(get-env :target-path)
+       {:target-path ~target-path
         :asset-path ~asset-path
         :cljs-asset-path ~cljs-asset-path}
         ~changed))))
@@ -110,6 +110,7 @@
    c cljs-asset-path PATH str "The actual asset path. This is added to the start of reloaded urls. (optional)"
    o open-file COMMAND str "The command to run when warning or exception is clicked on HUD. Passed to format. (optional)"
    v disable-hud      bool "Toggle to disable HUD. Defaults to false (visible)."
+   t target-path       str "Target path to load files from, used WHEN serving files using file: protocol. (optional)"
    _ only-by-re REGEXES [regex] "Vector of path regexes (for `boot.core/by-re`) to restrict reloads to only files within these paths (optional)."]
 
   (let [ns   (name (gensym "init"))
@@ -157,6 +158,7 @@
               (send-changed! @pod
                              asset-path
                              cljs-asset-path
+                             target-path
                              (changed @prev fileset only-by-re static-files))
               (reset! prev fileset))
             fileset))))))
