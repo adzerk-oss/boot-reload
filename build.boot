@@ -7,7 +7,7 @@
 
 (require '[adzerk.boot-test :refer [test]])
 
-(def +version+ "0.4.12")
+(def +version+ "0.4.13-SNAPSHOT")
 
 (task-options!
   pom {:project     'adzerk/boot-reload
