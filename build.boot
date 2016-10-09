@@ -24,6 +24,13 @@
    (jar)
    (install)))
 
+(deftask dev []
+  (comp
+   (watch)
+   (repl :server true)
+   (build)
+   (target)))
+
 (deftask deploy []
   (comp
    (build)
