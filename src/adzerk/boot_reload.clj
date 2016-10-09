@@ -110,7 +110,7 @@
    c cljs-asset-path PATH str "The actual asset path. This is added to the start of reloaded urls. (optional)"
    o open-file COMMAND str "The command to run when warning or exception is clicked on HUD. Passed to format. (optional)"
    v disable-hud      bool "Toggle to disable HUD. Defaults to false (visible)."
-   t target-path       str "Target path to load files from, used WHEN serving files using file: protocol. (optional)"
+   t target-path      VAL str "Target path to load files from, used WHEN serving files using file: protocol. (optional)"
    _ only-by-re REGEXES [regex] "Vector of path regexes (for `boot.core/by-re`) to restrict reloads to only files within these paths (optional)."]
 
   (let [ns   (name (gensym "init"))
