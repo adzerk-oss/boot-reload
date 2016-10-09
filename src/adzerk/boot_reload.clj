@@ -140,12 +140,19 @@
               fileset (try
                         (next-task fileset)
                         (catch Exception e
-                          (if (and (= :boot-cljs (:from (ex-data e))) (not disable-hud))
+                          ;; FIXME: Supports only single error, e.g. less compiler
+                          ;; can give multiple errors.
+                          (if (and (not disable-hud)
+                                   (or (= :boot-cljs (:from (ex-data e)))
+                                       (:adzerk.boot-reload/exception (ex-data e))))
                             (send-visual! @pod {:exception (merge {:message (.getMessage e)}
                                                                   (ex-data e))}))
                           (throw e)))]
           (let [cljs-edn (relevant-cljs-edn fileset ids)
-                warnings (mapcat :adzerk.boot-cljs/warnings cljs-edn)
+                ;; cljs uses specific key for now
+                ;; but any other file can contain warnings for boot-reload
+                warnings (concat (mapcat :adzerk.boot-cljs/warnings cljs-edn)
+                                 (mapcat :adzerk.boot-reload/warnings (b/input-files fileset)))
                 static-files (->> cljs-edn
                                   (map b/tmp-path)
                                   (map(fn [x] (clojure.string/replace x #"\.cljs\.edn$" ".js")))
