@@ -84,9 +84,9 @@
   (mk-node :div nil nil))
 
 (defn logo-node [logo]
-  (if (exists? dom/constHtmlToNode)
-    (dom/constHtmlToNode (.from goog.string/Const logo))
-    (dom/htmlToDocumentFragment logo)))
+  (let [element (js/document.createElement "div")]
+    (set! (. element -innerHTML) logo)
+    (aget (. element -childNodes) 0)))
 
 (defn warnings-node [warnings]
   (mk-node :div nil (map warning-node warnings)))
