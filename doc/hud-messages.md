@@ -1,5 +1,9 @@
 # HUD messages
 
+**Subject to change in following versions.**
+
+Example implementation: https://github.com/Deraen/less4clj/blob/master/boot-less/src/deraen/boot_less.clj#L104-L111
+
 Shared data format for exception data or warning.
 
 ```clj

@@ -1,3 +1,9 @@
+## 0.4.13 (18.10.2016)
+
+- Generic way tasks to send messages to HUD: https://github.com/adzerk-oss/boot-reload/blob/master/doc/hud-messages.md ([#72](https://github.com/adzerk-oss/boot-reload/issues/72))
+
+**[compare](https://github.com/adzerk-oss/boot-reload/compare/0.4.12...0.4.13)**
+
 ## 0.4.12 (20.7.2016)
 
 - Fix CLJS logo issues with CLJS 1.9.76 and below ([#87](https://github.com/adzerk-oss/boot-reload/issues/87))
