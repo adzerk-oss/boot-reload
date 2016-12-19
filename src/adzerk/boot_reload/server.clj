@@ -9,6 +9,7 @@
 
 (def options (atom {:open-file nil}))
 (def clients (atom {}))
+(def stop-fn (atom nil))
 
 (defn set-options [opts]
   (reset! options opts))
@@ -66,5 +67,12 @@
 
 (defn start
   [{:keys [ip port] :as opts}]
-  (let [o {:ip (or ip "0.0.0.0") :port (or port 0)}]
-    (assoc o :port (-> (http/run-server handler o) meta :local-port))))
+  (let [o {:ip (or ip "0.0.0.0") :port (or port 0)}
+        stop-fn* (http/run-server handler o)]
+    (reset! stop-fn stop-fn*)
+    (assoc o :port (-> stop-fn* meta :local-port))))
+
+(defn stop []
+  (when @stop-fn
+    (@stop-fn)
+    (reset! stop-fn nil)))
