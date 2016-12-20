@@ -8,7 +8,7 @@
    [java.io IOException]))
 
 (def options (atom {:open-file nil}))
-(def clients (atom {}))
+(def clients (atom #{}))
 (def stop-fn (atom nil))
 
 (defn set-options [opts]
@@ -28,14 +28,14 @@
                                   ""))})))
 
 (defn send-visual! [messages]
-  (doseq [[channel _] @clients]
+  (doseq [channel @clients]
     (http/send! channel (pr-str (merge {:type :visual}
                                        messages)))))
 
 (defn send-changed!
   ([changed] (send-changed! {} changed))
   ([opts changed]
-   (doseq [[channel _] @clients]
+   (doseq [channel @clients]
      (http/send! channel
                  (pr-str {:type :reload
                           :files (map #(web-path opts %) changed)})))))
@@ -52,8 +52,8 @@
           (util/fail "There was a problem running open-file command: %s\n" cmd))))))
 
 (defn connect! [channel]
-  (swap! clients assoc channel {})
-  (http/on-close channel (fn [_] (swap! clients dissoc channel)))
+  (swap! clients conj channel)
+  (http/on-close channel (fn [_] (swap! clients disj channel)))
   (http/on-receive channel #(handle-message channel (read-string %))))
 
 (defn handler [request]
