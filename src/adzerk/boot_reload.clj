@@ -126,6 +126,7 @@
                                  :open-file open-file})]
     (set-env! :source-paths #(conj % (.getPath src)))
     (write-cljs! out ns url ws-host on-jsload asset-host)
+    (b/cleanup (pod/with-call-in @pod (adzerk.boot-reload.server/stop)))
     (fn [next-task]
       (fn [fileset]
         (pod/with-call-in @pod
