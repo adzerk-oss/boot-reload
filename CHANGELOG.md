@@ -1,3 +1,9 @@
+## Unreleased
+
+- Close HttpKit server used for Reload WebSocket connection when task is closed ([#107](https://github.com/adzerk-oss/boot-reload/issues/107)))
+
+**[compare](https://github.com/adzerk-oss/boot-reload/compare/0.4.13...master)**
+
 ## 0.4.13 (18.10.2016)
 
 - Generic way tasks to send messages to HUD: https://github.com/adzerk-oss/boot-reload/blob/master/doc/hud-messages.md ([#72](https://github.com/adzerk-oss/boot-reload/issues/72))
