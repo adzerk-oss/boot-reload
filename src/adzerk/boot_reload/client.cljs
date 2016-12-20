@@ -52,8 +52,6 @@
 
        (event/listen conn :opened
                      (fn [evt]
-                       (send-message! {:type :set-protocol
-                                       :protocol (.. js/window -location -protocol)})
                        (.info js/console "Reload websocket connected.")))
 
        (event/listen conn :message

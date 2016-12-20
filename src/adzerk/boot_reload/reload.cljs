@@ -75,7 +75,13 @@
        (exists? js/window.document.documentURI)))
 
 (defn reload [changed opts]
-  (let [changed* (map #(str (:asset-host opts) %) changed)]
+  (let [changed* (->> changed
+                      (map (fn [{:keys [canonical-path web-path]}]
+                             (if (= "file:" (.. js/window -location -protocol))
+                               canonical-path
+                               web-path)))
+                      ;; This should probably be empty if serving from file-system
+                      (map #(str (:asset-host opts) %)))]
     (group-log "Reload" changed*)
     (reload-js changed* opts)
     (when (has-dom?)

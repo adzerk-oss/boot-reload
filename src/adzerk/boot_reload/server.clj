@@ -19,14 +19,13 @@
   ([opts rel-path]
    ; windows fix, convert \ characters to / in rel-path
    (let [rel-path (string/replace rel-path #"\\" "/")
-         {:keys [protocol target-path asset-path cljs-asset-path]} opts]
-     (if (= "file:" protocol)
-       (.getCanonicalPath (io/file target-path rel-path))
-       (str
-        cljs-asset-path "/"
-        (string/replace rel-path
-                        (re-pattern (str "^" (string/replace (or asset-path "") #"^/" "") "/"))
-                        ""))))))
+         {:keys [target-path asset-path cljs-asset-path]} opts]
+     {:canonical-path (.getCanonicalPath (io/file target-path rel-path))
+      :web-path (str
+                  cljs-asset-path "/"
+                  (string/replace rel-path
+                                  (re-pattern (str "^" (string/replace (or asset-path "") #"^/" "") "/"))
+                                  ""))})))
 
 (defn send-visual! [messages]
   (doseq [[channel _] @clients]
@@ -36,15 +35,12 @@
 (defn send-changed!
   ([changed] (send-changed! {} changed))
   ([opts changed]
-   (doseq [[channel {:keys [protocol]}] @clients]
+   (doseq [[channel _] @clients]
      (http/send! channel
                  (pr-str {:type :reload
-                          :files (map #(web-path (assoc opts :protocol protocol) %) changed)})))))
+                          :files (map #(web-path opts %) changed)})))))
 
 (defmulti handle-message (fn [channel message] (:type message)))
-
-(defmethod handle-message :set-protocol [channel {:keys [protocol]}]
-  (swap! clients assoc-in [channel :protocol] protocol))
 
 (defmethod handle-message :open-file [channel {:keys [file line column]}]
   (when-let [open-file (:open-file @options)]
