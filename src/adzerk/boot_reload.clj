@@ -67,14 +67,18 @@
 (defn- add-init!
   [ns in-file out-file]
   (let [ns (symbol (str 'adzerk.boot-reload "." ns))
-        spec (-> in-file slurp read-string)]
+        spec (-> in-file slurp read-string)
+        use-preloads? (and (empty? (:require spec)) (empty? (:init-fns spec))
+                           (get-in spec [:compiler-options :main]))]
     (when (not= :nodejs (-> spec :compiler-options :target))
-      (util/info "Adding :require %s to %s...\n" ns (.getName in-file))
+      (if use-preloads?
+        (util/info "Adding :compiler-options :preloads %s to %s...\n" ns (.getName in-file))
+        (util/info "Adding :require %s to %s...\n" ns (.getName in-file)))
       (io/make-parents out-file)
-      (-> spec
-        (update-in [:require] conj ns)
-        pr-str
-        ((partial spit out-file))))))
+      (let [new-spec (if use-preloads?
+                       (update-in spec [:compiler-options :preloads] conj ns)
+                       (update-in spec [:require] conj ns))]
+        (spit out-file (pr-str new-spec))))))
 
 (defn- relevant-cljs-edn [fileset ids]
   (let [relevant  (map #(str % ".cljs.edn") ids)
