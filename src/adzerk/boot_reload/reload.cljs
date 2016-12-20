@@ -48,7 +48,7 @@
       (-> #(-> % guri/parse .makeUnique)
         (map js-files)
         clj->js
-        (jsloader/loadMany)
+        (jsloader/loadMany #js {:cleanupWhenDone true})
         (.addCallbacks
           (fn [& _] (on-jsload))
           (fn [e] (.error js/console "Load failed:" (.-message e)))))
