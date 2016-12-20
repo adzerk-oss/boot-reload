@@ -44,7 +44,8 @@
 (defn connect
   ([url] (connect url nil))
   ([url opts]
-   (when-not (alive?)
+   (when (and (not (alive?))
+              (some? goog/dependencies_))
      (let [conn (ws/websocket-connection)]
        (patch-goog-base!)
        (reset! ws-conn conn)
