@@ -3,7 +3,8 @@
 - Close HttpKit server used for Reload WebSocket connection when task is closed ([#107](https://github.com/adzerk-oss/boot-reload/issues/107))
 - Uses `localhost` as fallback WebSocket host, but also shows the warning if the
 host can't be properly detected (.e.g when serving from `file:` URI). ([#92](https://github.com/adzerk-oss/boot-reload/issues/92), [#98](https://github.com/adzerk-oss/boot-reload/issues/98))
-
+- Checks if `window` methods exists before trying to access them, to prevent problems with React-native and other
+environments where they don't exist ([#110](https://github.com/adzerk-oss/boot-reload/pull/110))
 
 **[compare](https://github.com/adzerk-oss/boot-reload/compare/0.4.13...master)**
 
