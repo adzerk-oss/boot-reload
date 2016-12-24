@@ -77,7 +77,7 @@
 (defn reload [changed opts]
   (let [changed* (->> changed
                       (map (fn [{:keys [canonical-path web-path]}]
-                             (if (= "file:" (.. js/window -location -protocol))
+                             (if (= "file:" (some-> js/window .-location .-protocol))
                                canonical-path
                                web-path)))
                       ;; This should probably be empty if serving from file-system

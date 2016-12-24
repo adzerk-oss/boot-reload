@@ -21,7 +21,7 @@
 (defn resolve-url [url ws-host]
   (let [passed-uri (Uri. url)
         protocol   (.getScheme passed-uri)
-        hostname   (.-hostname (.-location js/window))
+        hostname   (some-> js/window .-location .-hostname)
         host       (cond
                      ws-host ws-host
                      (seq hostname) hostname
