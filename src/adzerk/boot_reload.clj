@@ -4,11 +4,13 @@
    [boot.core          :as b]
    [clojure.java.io    :as io]
    [clojure.set        :as set]
+   [clojure.string     :as string]
    [boot.pod           :as pod]
    [boot.file          :as file]
    [boot.util          :as util]
    [boot.core          :refer :all]
-   [boot.from.backtick :as bt]))
+   [boot.from.backtick :as bt]
+   [boot.from.digest   :as digest]))
 
 (def ^:private deps '[[http-kit "2.1.18"]])
 
@@ -83,6 +85,17 @@
                     #(b/by-ext [".cljs.edn"] %))]
     (-> fileset b/input-files f)))
 
+(defn- namespace-for-cljs-edn
+  [tmpfile]
+  (let [path (tmp-path tmpfile)
+        clean-name (-> (.getName (io/file path))
+                       (string/replace #"\.cljs\.edn$" "")
+                       (string/replace #"[^a-zA-Z0-9]" ""))]
+    (str "init-"
+         clean-name
+         "-"
+         (subs (digest/md5 path) 0 8))))
+
 (deftask reload
   "Live reload of page resources in browser via websocket.
 
@@ -113,14 +126,11 @@
    t target-path      VAL str "Target path to load files from, used WHEN serving files using file: protocol. (optional)"
    _ only-by-re REGEXES [regex] "Vector of path regexes (for `boot.core/by-re`) to restrict reloads to only files within these paths (optional)."]
 
-  (let [ns   (name (gensym "init"))
-        pod  (make-pod)
+  (let [pod  (make-pod)
         src  (tmp-dir!)
         tmp  (tmp-dir!)
         prev-pre (atom nil)
         prev (atom nil)
-        out  (doto (io/file src "adzerk" "boot_reload" (str ns ".cljs"))
-               io/make-parents)
         url  (start-server @pod {:ip ip :port port :ws-host ws-host
                                  :ws-port ws-port :secure? secure
                                  :open-file open-file})]
@@ -133,8 +143,13 @@
           (adzerk.boot-reload.server/set-options {:open-file ~open-file}))
         (doseq [f (relevant-cljs-edn (b/fileset-diff @prev-pre fileset) ids)]
           (let [path     (tmp-path f)
+                spec     (-> f tmp-file slurp read-string)
+                ns       (namespace-for-cljs-edn f)
+                out      (doto (io/file src "adzerk" "boot_reload" (str (string/replace ns "-" "_") ".cljs"))
+                           io/make-parents)
                 in-file  (tmp-file f)
                 out-file (io/file tmp path)]
+            (write-cljs! out ns url ws-host (get spec :on-jsload on-jsload) asset-host)
             (add-init! ns in-file out-file)))
         (reset! prev-pre fileset)
         (let [fileset (-> fileset (add-resource tmp) commit!)
@@ -156,7 +171,7 @@
                                  (mapcat :adzerk.boot-reload/warnings (b/input-files fileset)))
                 static-files (->> cljs-edn
                                   (map b/tmp-path)
-                                  (map(fn [x] (clojure.string/replace x #"\.cljs\.edn$" ".js")))
+                                  (map(fn [x] (string/replace x #"\.cljs\.edn$" ".js")))
                                   set)]
             (if-not disable-hud
               (send-visual! @pod {:warnings warnings}))
