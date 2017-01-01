@@ -127,15 +127,12 @@
    _ only-by-re REGEXES [regex] "Vector of path regexes (for `boot.core/by-re`) to restrict reloads to only files within these paths (optional)."]
 
   (let [pod  (make-pod)
-        src  (tmp-dir!)
         tmp  (tmp-dir!)
         prev-pre (atom nil)
         prev (atom nil)
         url  (start-server @pod {:ip ip :port port :ws-host ws-host
                                  :ws-port ws-port :secure? secure
                                  :open-file open-file})]
-    (set-env! :source-paths #(conj % (.getPath src)))
-    (write-cljs! out ns url ws-host on-jsload asset-host)
     (b/cleanup (pod/with-call-in @pod (adzerk.boot-reload.server/stop)))
     (fn [next-task]
       (fn [fileset]
@@ -145,7 +142,7 @@
           (let [path     (tmp-path f)
                 spec     (-> f tmp-file slurp read-string)
                 ns       (namespace-for-cljs-edn f)
-                out      (doto (io/file src "adzerk" "boot_reload" (str (string/replace ns "-" "_") ".cljs"))
+                out      (doto (io/file tmp "adzerk" "boot_reload" (str (string/replace ns "-" "_") ".cljs"))
                            io/make-parents)
                 in-file  (tmp-file f)
                 out-file (io/file tmp path)]
