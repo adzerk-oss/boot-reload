@@ -38,11 +38,11 @@
     (util/info "Starting reload server on %s\n" (format "%s://%s:%d" proto listen-host port))
     (format "%s://%s:%d" proto client-host (or ws-port port))))
 
-(defn- write-cljs! [f ns url ws-host on-jsload asset-host]
+(defn- write-cljs! [f client-ns url ws-host on-jsload asset-host]
   (util/info "Writing adzerk/boot_reload/%s to connect to %s...\n" (.getName f) url)
-  (let [ns (symbol (str 'adzerk.boot-reload "." ns))]
+  (let [client-ns (symbol (str 'adzerk.boot-reload "." client-ns))]
     (->> (bt/template
-          ((ns ~ns
+          ((ns ~client-ns
              (:require
               [adzerk.boot-reload.client :as client]
               ~@(when on-jsload [(symbol (namespace on-jsload))])))
@@ -67,14 +67,14 @@
         ~changed))))
 
 (defn- add-init!
-  [ns in-file out-file]
-  (let [ns (symbol (str 'adzerk.boot-reload "." ns))
+  [client-ns in-file out-file]
+  (let [client-ns (symbol (str 'adzerk.boot-reload "." client-ns))
         spec (-> in-file slurp read-string)]
     (when (not= :nodejs (-> spec :compiler-options :target))
-      (util/info "Adding :require %s to %s...\n" ns (.getName in-file))
+      (util/info "Adding :require %s to %s...\n" client-ns (.getName in-file))
       (io/make-parents out-file)
       (-> spec
-        (update-in [:require] conj ns)
+        (update-in [:require] conj client-ns)
         pr-str
         ((partial spit out-file))))))
 
@@ -141,13 +141,13 @@
         (doseq [f (relevant-cljs-edn (b/fileset-diff @prev-pre fileset) ids)]
           (let [path     (tmp-path f)
                 spec     (-> f tmp-file slurp read-string)
-                ns       (namespace-for-cljs-edn f)
-                out      (doto (io/file tmp "adzerk" "boot_reload" (str (string/replace ns "-" "_") ".cljs"))
+                client-ns (namespace-for-cljs-edn f)
+                out      (doto (io/file tmp "adzerk" "boot_reload" (str (string/replace client-ns "-" "_") ".cljs"))
                            io/make-parents)
                 in-file  (tmp-file f)
                 out-file (io/file tmp path)]
-            (write-cljs! out ns url ws-host (get spec :on-jsload on-jsload) asset-host)
-            (add-init! ns in-file out-file)))
+            (write-cljs! out client-ns url ws-host (get spec :on-jsload on-jsload) asset-host)
+            (add-init! client-ns in-file out-file)))
         (reset! prev-pre fileset)
         (let [fileset (-> fileset (add-resource tmp) commit!)
               fileset (try
