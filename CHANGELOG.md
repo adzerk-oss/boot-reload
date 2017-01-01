@@ -9,6 +9,9 @@ environments where they don't exist ([#110](https://github.com/adzerk-oss/boot-r
     - This probably doesn't change anything, but there is small change this
     could fix some rare, hard to reproduce errors about Boot-reload Cljs
     file not being found.
+- Use `.cljs.edn` path for Boot-reload client namespace name
+- Read `on-jsload` option from `.cljs.edn` to allow different values for
+different builds
 
 **[compare](https://github.com/adzerk-oss/boot-reload/compare/0.4.13...master)**
 
