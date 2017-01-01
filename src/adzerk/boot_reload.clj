@@ -10,7 +10,7 @@
    [boot.util          :as util]
    [boot.core          :refer :all]
    [boot.from.backtick :as bt]
-   [boot.from.digest   :as digest]))
+   [adzerk.boot-reload.util :as rutil]))
 
 (def ^:private deps '[[http-kit "2.1.18"]])
 
@@ -38,18 +38,22 @@
     (util/info "Starting reload server on %s\n" (format "%s://%s:%d" proto listen-host port))
     (format "%s://%s:%d" proto client-host (or ws-port port))))
 
-(defn- write-cljs! [f client-ns url ws-host on-jsload asset-host]
-  (util/info "Writing adzerk/boot_reload/%s to connect to %s...\n" (.getName f) url)
-  (let [client-ns (symbol (str 'adzerk.boot-reload "." client-ns))]
+(defn- write-cljs! [tmp client-ns url ws-host on-jsload asset-host]
+  (util/info "Writing %s to connect to %s...\n" (.getPath (rutil/ns->file client-ns "cljs")) url)
+  (let [out (doto (rutil/ns->file tmp client-ns "cljs")
+              io/make-parents)]
     (->> (bt/template
-          ((ns ~client-ns
+          ((ns ~(symbol client-ns)
              (:require
               [adzerk.boot-reload.client :as client]
               ~@(when on-jsload [(symbol (namespace on-jsload))])))
            (client/connect ~url {:on-jsload #(~(or on-jsload '+))
                                  :asset-host ~asset-host
                                  :ws-host ~ws-host})))
-         (map pr-str) (interpose "\n") (apply str) (spit f))))
+         (map pr-str)
+         (interpose "\n")
+         (apply str)
+         (spit out))))
 
 (defn- send-visual! [pod messages]
   (when-not (empty? messages)
@@ -68,7 +72,7 @@
 
 (defn- add-init!
   [client-ns in-file out-file]
-  (let [client-ns (symbol (str 'adzerk.boot-reload "." client-ns))
+  (let [client-ns (symbol client-ns)
         spec (-> in-file slurp read-string)]
     (when (not= :nodejs (-> spec :compiler-options :target))
       (util/info "Adding :require %s to %s...\n" client-ns (.getName in-file))
@@ -84,17 +88,6 @@
                     #(b/by-path relevant %)
                     #(b/by-ext [".cljs.edn"] %))]
     (-> fileset b/input-files f)))
-
-(defn- namespace-for-cljs-edn
-  [tmpfile]
-  (let [path (tmp-path tmpfile)
-        clean-name (-> (.getName (io/file path))
-                       (string/replace #"\.cljs\.edn$" "")
-                       (string/replace #"[^a-zA-Z0-9]" ""))]
-    (str "init-"
-         clean-name
-         "-"
-         (subs (digest/md5 path) 0 8))))
 
 (deftask reload
   "Live reload of page resources in browser via websocket.
@@ -141,12 +134,10 @@
         (doseq [f (relevant-cljs-edn (b/fileset-diff @prev-pre fileset) ids)]
           (let [path     (tmp-path f)
                 spec     (-> f tmp-file slurp read-string)
-                client-ns (namespace-for-cljs-edn f)
-                out      (doto (io/file tmp "adzerk" "boot_reload" (str (string/replace client-ns "-" "_") ".cljs"))
-                           io/make-parents)
+                client-ns (str "adzerk.boot-reload." (rutil/path->ns path))
                 in-file  (tmp-file f)
                 out-file (io/file tmp path)]
-            (write-cljs! out client-ns url ws-host (get spec :on-jsload on-jsload) asset-host)
+            (write-cljs! tmp client-ns url ws-host (get spec :on-jsload on-jsload) asset-host)
             (add-init! client-ns in-file out-file)))
         (reset! prev-pre fileset)
         (let [fileset (-> fileset (add-resource tmp) commit!)
