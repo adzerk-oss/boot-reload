@@ -71,11 +71,10 @@
         ~changed))))
 
 (defn- add-init!
-  [client-ns in-file out-file]
-  (let [client-ns (symbol client-ns)
-        spec (-> in-file slurp read-string)]
+  [client-ns spec out-file cljs-edn-path]
+  (let [client-ns (symbol client-ns)]
     (when (not= :nodejs (-> spec :compiler-options :target))
-      (util/info "Adding :require %s to %s...\n" client-ns (.getName in-file))
+      (util/info "Adding :require %s to %s...\n" client-ns cljs-edn-path)
       (io/make-parents out-file)
       (-> spec
         (update-in [:require] conj client-ns)
@@ -135,10 +134,9 @@
           (let [path     (tmp-path f)
                 spec     (-> f tmp-file slurp read-string)
                 client-ns (str "adzerk.boot-reload." (rutil/path->ns path))
-                in-file  (tmp-file f)
                 out-file (io/file tmp path)]
             (write-cljs! tmp client-ns url ws-host (get spec :on-jsload on-jsload) asset-host)
-            (add-init! client-ns in-file out-file)))
+            (add-init! client-ns spec out-file path)))
         (reset! prev-pre fileset)
         (let [fileset (-> fileset (add-resource tmp) commit!)
               fileset (try
