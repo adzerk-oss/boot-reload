@@ -1,4 +1,4 @@
-## Unreleased
+## 0.5.0 (3.1.2016)
 
 - Close HttpKit server used for Reload WebSocket connection when task is closed ([#107](https://github.com/adzerk-oss/boot-reload/issues/107))
 - Uses `localhost` as fallback WebSocket host, but also shows the warning if the
@@ -12,7 +12,7 @@ environments where they don't exist ([#110](https://github.com/adzerk-oss/boot-r
 - Use `.cljs.edn` path for Boot-reload client namespace name
 - Read client options from `:boot-reload` property in `.cljs.edn` to allow different values for different builds
 
-**[compare](https://github.com/adzerk-oss/boot-reload/compare/0.4.13...master)**
+**[compare](https://github.com/adzerk-oss/boot-reload/compare/0.4.13...0.5.0)**
 
 ## 0.4.13 (18.10.2016)
 
