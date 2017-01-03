@@ -183,6 +183,8 @@
             ; Only send changed files when there are no warnings
             ; As prev is updated only when changes are sent, changes are queued untill they can be sent
             (when (empty? warnings)
+              ;; IDEA: asset-path & cljs-asset-path could be handed in the client side and
+              ;; they would only need to be written to client cljs. Would allow different options for each build.
               (send-changed! @pod
                              asset-path
                              cljs-asset-path
