@@ -130,6 +130,8 @@
       (fn [fileset]
         (pod/with-call-in @pod
           (adzerk.boot-reload.server/set-options {:open-file ~open-file}))
+
+        ;; Only changed cljs.edn files
         (doseq [f (relevant-cljs-edn (b/fileset-diff @prev-pre fileset) ids)]
           (let [path     (tmp-path f)
                 spec     (-> f tmp-file slurp read-string)
@@ -137,6 +139,15 @@
                 out-file (io/file tmp path)]
             (write-cljs! tmp client-ns url ws-host (get spec :on-jsload on-jsload) asset-host)
             (add-init! client-ns spec out-file path)))
+
+        ;; Special case: boot-cljs used without .cljs.edn
+        ;; in that case we can just create client file with any name and it will be
+        ;; required by boot-cljs.
+        ;; If file already exists, do nothing.
+        (when (and (empty? (relevant-cljs-edn fileset ids))
+                   (nil? (b/tmp-get (.getPath (rutil/ns->file "adzerk.boot-reload" "cljs")))))
+          (write-cljs! tmp "adzerk.boot-reload" url ws-host on-jsload asset-host))
+
         (reset! prev-pre fileset)
         (let [fileset (-> fileset (add-resource tmp) commit!)
               fileset (try
