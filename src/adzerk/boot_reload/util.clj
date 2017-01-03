@@ -1,20 +1,44 @@
 (ns adzerk.boot-reload.util
   (:require [clojure.string :as string]
-            [clojure.java.io :as io]))
+            [clojure.java.io :as io]
+            [clojure.walk :as walk])
+  (:import [java.io File]))
 
-(defn path->ns
-  [path]
-  (-> path
-      (string/replace #"\..+$" "")
-      (string/replace #"_" "-")
-      (string/replace #"[/\\]" ".")))
+(defn build-id
+  "Return the build id from the file path (as string)."
+  [file-path]
+  (string/replace file-path #"\.cljs\.edn$" ""))
 
-(defn ns->file
-  ([ns-name ext]
-   (let [ns-name (string/replace ns-name #"-" "_")
-         parts (string/split ns-name #"\.")]
-     (apply io/file (conj (vec (butlast parts)) (str (last parts) "." ext)))))
-  ([parent ns-name ext]
-   (let [ns-name (string/replace ns-name #"-" "_")
-         parts (string/split ns-name #"\.")]
-     (apply io/file parent (conj (vec (butlast parts)) (str (last parts) "." ext))))))
+;;
+;; Exception serialization
+;; Also see: https://github.com/boot-clj/boot/issues/553
+;;
+
+(defn safe-data [data]
+  (walk/postwalk
+   (fn [x]
+     (cond
+       (instance? File x) (.getPath x)
+       :else x))
+   data))
+
+(defn serialize-exception
+  "Serializes given exception keeping original message, stack-trace, cause stack
+   and ex-data for ExceptionInfo.
+
+   Certain types in ex-data are converted to strings. Currently this includes
+   Files."
+  [e]
+  {:class (-> e type .getName) ;; AR - this is ignored by the deserializer
+   :message (.getMessage e)
+   :data (safe-data (ex-data e)) ;; AR - no :ex-data, figwheel likes :data
+   :cause (when-let [cause (.getCause e)]
+            (serialize-exception cause))})
+
+(defn remove-nils [m]
+  (let [f (fn [x]
+            (if (map? x)
+              (let [kvs (filter (comp not nil? second) x)]
+                (if (empty? kvs) nil (into {} kvs)))
+              x))]
+    (walk/postwalk f m)))
