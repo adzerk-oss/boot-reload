@@ -152,7 +152,7 @@
         ;; required by boot-cljs.
         ;; If file already exists, do nothing.
         (when (and (empty? (relevant-cljs-edn fileset ids))
-                   (nil? (b/tmp-get (.getPath (rutil/ns->file "adzerk.boot-reload" "cljs")))))
+                   (nil? (b/tmp-get fileset (.getPath (rutil/ns->file "adzerk.boot-reload" "cljs")))))
           (write-cljs! tmp "adzerk.boot-reload" url ws-host {:on-jsload on-jsload
                                                              :asset-host asset-host}))
 
