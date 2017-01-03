@@ -38,7 +38,7 @@
     (util/info "Starting reload server on %s\n" (format "%s://%s:%d" proto listen-host port))
     (format "%s://%s:%d" proto client-host (or ws-port port))))
 
-(defn- write-cljs! [tmp client-ns url ws-host on-jsload asset-host]
+(defn- write-cljs! [tmp client-ns url ws-host {:keys [on-jsload asset-host]}]
   (util/info "Writing %s to connect to %s...\n" (.getPath (rutil/ns->file client-ns "cljs")) url)
   (let [out (doto (rutil/ns->file tmp client-ns "cljs")
               io/make-parents)]
@@ -99,7 +99,10 @@
   Arguments shouldn't have spaces.
   Examples:
   vim --remote +norm%sG%s| %s
-  emacsclient -n +%s:%s %s"
+  emacsclient -n +%s:%s %s
+
+  Client options can also be set in .cljs.edn file, using property :boot-reload, e.g.
+  :boot-reload {:on-jsload frontend.core/reload}"
 
   [b ids BUILD_IDS #{str} "Only inject reloading into these builds (= .cljs.edn files)"
    ;; Websocket Server
@@ -109,8 +112,8 @@
    w ws-host WSADDR  str  "The websocket host clients connect to. Defaults to current host. (optional)"
    s secure          bool "Flag to indicate whether the client should connect via wss. Defaults to false."
    ;; Other Configuration
-   j on-jsload SYM     sym "The callback to call when JS files are reloaded. (optional)"
-   _ asset-host HOST   str "The asset-host where to load files from. Defaults to host of opened page. (optional)"
+   j on-jsload SYM     sym "The callback to call when JS files are reloaded. (client, optional)"
+   _ asset-host HOST   str "The asset-host where to load files from. Defaults to host of opened page. (client, optional)"
    a asset-path PATH   str "Sets the output directory for temporary files used during compilation. (optional)"
    c cljs-asset-path PATH str "The actual asset path. This is added to the start of reloaded urls. (optional)"
    o open-file COMMAND str "The command to run when warning or exception is clicked on HUD. Passed to format. (optional)"
@@ -136,8 +139,12 @@
           (let [path     (tmp-path f)
                 spec     (-> f tmp-file slurp read-string)
                 client-ns (str "adzerk.boot-reload." (rutil/path->ns path))
-                out-file (io/file tmp path)]
-            (write-cljs! tmp client-ns url ws-host (get spec :on-jsload on-jsload) asset-host)
+                out-file (io/file tmp path)
+                client-opts (merge {:on-jsload on-jsload
+                                    :asset-host asset-host}
+                                   (:boot-reload spec))]
+            ;; ws-host is used by client, but is not client option because it mainly used by server
+            (write-cljs! tmp client-ns url ws-host client-opts)
             (add-init! client-ns spec out-file path)))
 
         ;; Special case: boot-cljs used without .cljs.edn
@@ -146,7 +153,8 @@
         ;; If file already exists, do nothing.
         (when (and (empty? (relevant-cljs-edn fileset ids))
                    (nil? (b/tmp-get (.getPath (rutil/ns->file "adzerk.boot-reload" "cljs")))))
-          (write-cljs! tmp "adzerk.boot-reload" url ws-host on-jsload asset-host))
+          (write-cljs! tmp "adzerk.boot-reload" url ws-host {:on-jsload on-jsload
+                                                             :asset-host asset-host}))
 
         (reset! prev-pre fileset)
         (let [fileset (-> fileset (add-resource tmp) commit!)
