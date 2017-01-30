@@ -2,12 +2,32 @@
   (:require [clojure.string :as string]
             [clojure.java.io :as io]))
 
+;; From cljs/analyzer.cljc
+(def js-reserved
+  #{"arguments" "abstract" "boolean" "break" "byte" "case"
+    "catch" "char" "class" "const" "continue"
+    "debugger" "default" "delete" "do" "double"
+    "else" "enum" "export" "extends" "final"
+    "finally" "float" "for" "function" "goto" "if"
+    "implements" "import" "in" "instanceof" "int"
+    "interface" "let" "long" "native" "new"
+    "package" "private" "protected" "public"
+    "return" "short" "static" "super" "switch"
+    "synchronized" "this" "throw" "throws"
+    "transient" "try" "typeof" "var" "void"
+    "volatile" "while" "with" "yield" "methods"
+    "null" "constructor"})
+
 (defn path->ns
   [path]
-  (-> path
-      (string/replace #"\..+$" "")
-      (string/replace #"_" "-")
-      (string/replace #"[/\\]" ".")))
+  (let [parts (-> path
+                  (string/replace #"\..+$" "")
+                  (string/replace #"_" "-")
+                  (string/replace #"[/\\]" ".")
+                  (string/split #"\."))]
+    (->> parts
+         (map #(if (js-reserved %) (str % "$") %))
+         (string/join "."))))
 
 (defn ns->file
   ([ns-name ext]

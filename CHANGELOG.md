@@ -1,3 +1,7 @@
+## Unreleased
+
+- Mungle reserved JS names in boot-reload client namespace (Fixes [#113](https://github.com/adzerk-oss/boot-reload/issues/113))
+
 ## 0.5.0 (3.1.2016)
 
 - Close HttpKit server used for Reload WebSocket connection when task is closed ([#107](https://github.com/adzerk-oss/boot-reload/issues/107))
