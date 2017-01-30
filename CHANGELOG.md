@@ -1,6 +1,6 @@
 ## Unreleased
 
-- Mungle reserved JS names in boot-reload client namespace (Fixes [#113](https://github.com/adzerk-oss/boot-reload/issues/113))
+- Munge reserved JS names in boot-reload client namespace (Fixes [#113](https://github.com/adzerk-oss/boot-reload/issues/113))
 
 ## 0.5.0 (3.1.2016)
 
