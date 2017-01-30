@@ -1,11 +1,11 @@
 (set-env!
   :resource-paths #{"src"}
   :source-paths #{"test"}
-  :dependencies '[[org.clojure/clojure "1.8.0"     :scope "provided"]
-                  [http-kit            "2.1.19"    :scope "test"]
-                  [adzerk/boot-test    "1.1.0"     :scope "test"]])
+  :dependencies '[[org.clojure/clojure "1.8.0" :scope "provided"]
+                  [http-kit "2.2.0" :scope "test"]
+                  [metosin/boot-alt-test "0.3.0" :scope "test"]])
 
-(require '[adzerk.boot-test :refer [test]])
+(require '[metosin.boot-alt-test :refer [alt-test]])
 
 (def +version+ "0.5.1-SNAPSHOT")
 
@@ -24,18 +24,20 @@
    (jar)
    (install)))
 
+(deftask run-tests []
+  (comp
+    (alt-test)))
+
 (deftask dev []
   (comp
    (watch)
    (repl :server true)
+   (run-tests)
    (build)
    (target)))
 
 (deftask deploy []
   (comp
-   (build)
-   (push :repo "clojars" :gpg-sign (not (.endsWith +version+ "-SNAPSHOT")))))
-
-(deftask run-tests []
-  (comp
-    (test :namespaces #{'adzerk.boot-reload.server-test})))
+    (run-tests)
+    (build)
+    (push :repo "clojars" :gpg-sign (not (.endsWith +version+ "-SNAPSHOT")))))
