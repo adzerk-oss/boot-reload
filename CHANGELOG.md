@@ -1,8 +1,10 @@
-## Unreleased
+## 0.5.1 (5.2.2017)
 
 - Munge reserved JS names in boot-reload client namespace (Fixes [#113](https://github.com/adzerk-oss/boot-reload/issues/113))
 
-## 0.5.0 (3.1.2016)
+**[compare](https://github.com/adzerk-oss/boot-reload/compare/0.5.0...0.5.1)**
+
+## 0.5.0 (3.1.2017)
 
 - Close HttpKit server used for Reload WebSocket connection when task is closed ([#107](https://github.com/adzerk-oss/boot-reload/issues/107))
 - Uses `localhost` as fallback WebSocket host, but also shows the warning if the
