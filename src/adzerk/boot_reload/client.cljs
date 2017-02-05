@@ -12,11 +12,42 @@
    goog.Uri))
 
 ;; Thanks, lein-figwheel & lively!
+(defonce reloader (atom {:running? false
+                         :queue []}))
+
+(declare maybe-load-next)
+
+(defn ready [_]
+  (swap! reloader (fn [state]
+                    (maybe-load-next (assoc state :running? false)))))
+
+(defn load-next [state]
+  (let [[file & queue] (:queue state)]
+    (doto (jsloader/load file)
+      (.addBoth ready))
+    (assoc state
+           :queue (vec queue)
+           :running? true)))
+
+(defn maybe-load-next [state]
+  (if (:running? state)
+    state
+    (if (seq (:queue state))
+      (load-next state))))
+
+(defn queue-file-load! [file]
+  (swap! reloader (fn [state]
+                    (maybe-load-next (update state :queue conj file)))))
+
+(defn bootstrap-goog-base []
+  (when-not js/COMPILED
+    (set! (.-provide js/goog) (.-exportPath_ js/goog))
+    (set! (.-CLOSURE_IMPORT_SCRIPT (.-global js/goog)) (fn [file]
+                                                         (when (.inHtmlDocument_ js/goog)
+                                                           (queue-file-load! file))))))
+
 (defn patch-goog-base! []
-  (set! (.-provide js/goog) (.-exportPath_ js/goog))
-  (set! (.-CLOSURE_IMPORT_SCRIPT (.-global js/goog)) (fn [file]
-                                                       (when (.inHtmlDocument_ js/goog)
-                                                         (jsloader/load file)))))
+  (defonce bootstrapped-goog-base (do (bootstrap-goog-base) true)))
 
 (defn resolve-url [url ws-host]
   (let [passed-uri (Uri. url)
