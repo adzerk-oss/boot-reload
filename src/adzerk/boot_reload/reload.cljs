@@ -3,6 +3,7 @@
    [clojure.string          :as string]
    [goog.Uri                :as guri]
    [goog.async.DeferredList :as deferred-list]
+   [goog.html.legacyconversions :as conv]
    [goog.net.jsloader       :as jsloader]))
 
 (defn- page-uri []
@@ -43,15 +44,16 @@
 
 (defn- reload-js [changed {:keys [on-jsload]
                            :or {on-jsload identity}}]
-  (let [js-files (filter #(ends-with? % ".js") changed)]
+  (let [js-files (filter #(ends-with? % ".js") changed)
+        to-safe-url (fn to-safe-url [js-file]
+                      (-> js-file guri/parse .makeUnique .toString conv/trustedResourceUrlFromString))]
     (when (seq js-files)
-      (-> #(-> % guri/parse .makeUnique)
-        (map js-files)
-        clj->js
-        (jsloader/loadMany #js {:cleanupWhenDone true})
-        (.addCallbacks
-          (fn [& _] (on-jsload))
-          (fn [e] (.error js/console "Load failed:" (.-message e)))))
+      (-> (map to-safe-url js-files)
+          clj->js
+          (jsloader/safeLoadMany #js {:cleanupWhenDone true})
+          (.addCallbacks
+           (fn [& _] (on-jsload))
+           (fn [e] (.error js/console "Load failed:" (.-message e)))))
       (when (aget js/window "jQuery")
         (.trigger (js/jQuery js/document) "page-load")))))
 
