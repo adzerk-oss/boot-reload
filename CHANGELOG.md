@@ -1,3 +1,9 @@
+## Unreleased
+
+- Fix for using with latest Closure library (which next ClojureScript uses)
+
+**[compare](https://github.com/adzerk-oss/boot-reload/compare/0.5.1...master)**
+
 ## 0.5.1 (5.2.2017)
 
 - Munge reserved JS names in boot-reload client namespace (Fixes [#113](https://github.com/adzerk-oss/boot-reload/issues/113))
