@@ -3,7 +3,7 @@
   :source-paths #{"test"}
   :dependencies '[[org.clojure/clojure "1.8.0" :scope "provided"]
                   [http-kit "2.2.0" :scope "test"]
-                  [metosin/boot-alt-test "0.3.0" :scope "test"]])
+                  [metosin/boot-alt-test "0.3.2" :scope "test"]])
 
 (require '[metosin.boot-alt-test :refer [alt-test]])
 

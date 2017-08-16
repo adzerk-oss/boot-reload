@@ -2,8 +2,8 @@
 
 set -e
 
-echo "1.9.0-alpha14"
-BOOT_CLOJURE_VERSION=1.9.0-alpha14 boot run-tests
+echo "1.9.0-alpha17"
+BOOT_CLOJURE_VERSION=1.9.0-alpha17 boot run-tests
 
 echo
 echo "1.8.0"
