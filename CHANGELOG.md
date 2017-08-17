@@ -1,8 +1,8 @@
-## Unreleased
+## 0.5.2 (2017-08-17)
 
 - Fix for using with latest Closure library (which next ClojureScript uses)
 
-**[compare](https://github.com/adzerk-oss/boot-reload/compare/0.5.1...master)**
+**[compare](https://github.com/adzerk-oss/boot-reload/compare/0.5.1...0.5.2)**
 
 ## 0.5.1 (5.2.2017)
 

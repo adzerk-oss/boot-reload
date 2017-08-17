@@ -7,7 +7,7 @@
 
 (require '[metosin.boot-alt-test :refer [alt-test]])
 
-(def +version+ "0.5.2-SNAPSHOT")
+(def +version+ "0.5.2")
 
 (task-options!
   pom {:project     'adzerk/boot-reload
