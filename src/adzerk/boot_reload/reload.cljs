@@ -42,15 +42,24 @@
         (when-let [href-uri (changed-uri (.-src image) changed)]
           (set! (.-src image) (.toString (.makeUnique href-uri))))))))
 
+(defn load-files [urls]
+  (let [opts #js {:cleanupWhenDone true}]
+    (cond
+      (exists? jsloader/safeLoadMany)
+      (jsloader/safeLoadMany
+        (clj->js (map #(-> % .toString conv/trustedResourceUrlFromString) urls))
+        opts)
+
+      (exists? jsloader/loadMany) (jsloader/loadMany (clj->js urls) opts)
+
+      :else (throw (ex-info "jsloader/safeLoadMany not found" {})))))
+
 (defn- reload-js [changed {:keys [on-jsload]
                            :or {on-jsload identity}}]
-  (let [js-files (filter #(ends-with? % ".js") changed)
-        to-safe-url (fn to-safe-url [js-file]
-                      (-> js-file guri/parse .makeUnique .toString conv/trustedResourceUrlFromString))]
+  (let [js-files (filter #(ends-with? % ".js") changed)]
     (when (seq js-files)
-      (-> (map to-safe-url js-files)
-          clj->js
-          (jsloader/safeLoadMany #js {:cleanupWhenDone true})
+      (-> (map #(-> % guri/parse .makeUnique) js-files)
+          load-files
           (.addCallbacks
            (fn [& _] (on-jsload))
            (fn [e] (.error js/console "Load failed:" (.-message e)))))
