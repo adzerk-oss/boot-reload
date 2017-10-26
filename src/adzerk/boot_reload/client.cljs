@@ -16,7 +16,7 @@
   (set! (.-provide js/goog) (.-exportPath_ js/goog))
   (set! (.-CLOSURE_IMPORT_SCRIPT (.-global js/goog)) (fn [file]
                                                        (when (.inHtmlDocument_ js/goog)
-                                                         (jsloader/load file)))))
+                                                         (jsloader/safeLoad file)))))
 
 (defn resolve-url [url ws-host]
   (let [passed-uri (Uri. url)
