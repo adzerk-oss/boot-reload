@@ -6,8 +6,10 @@
 the project change. Communication with the client is via websockets.
 
 * Provides the `reload` task
-* Reload client can show warnings and exceptions from ClojureScript build on **heads-up display**.
-    * Requires `[adzerk/boot-cljs "1.7.48-5"]`
+* Reload client can show warnings and exceptions **heads-up display**
+    * Other tasks can use [this API](./doc/hud-messages.md) to send messages to Boot-reload
+    * Supports [boot-cljs] (Requires `[adzerk/boot-cljs "1.7.48-5"]`)
+    * Supports [less4clj] and [sass4clj]
 
 ## Usage
 
@@ -59,3 +61,6 @@ your option) any later version.
 [1]:                https://github.com/boot-clj/boot
 [2]:                http://clojars.org/adzerk/boot-reload/latest-version.svg?cache=6
 [3]:                http://clojars.org/adzerk/boot-reload
+[boot-cljs]: https://github.com/boot-clj/boot-cljs
+[sass4clj]: https://github.com/Deraen/sass4clj
+[less4clj]: https://github.com/Deraen/less4clj
