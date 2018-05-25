@@ -12,7 +12,7 @@
    [boot.from.backtick :as bt]
    [adzerk.boot-reload.util :as rutil]))
 
-(def ^:private deps '[[http-kit "2.2.0"]])
+(def ^:private deps '[[http-kit "2.3.0"]])
 
 (defn- make-pod []
   (future (-> (get-env) (update-in [:dependencies] into deps) pod/make-pod)))
