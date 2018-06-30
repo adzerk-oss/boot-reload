@@ -1,3 +1,11 @@
+## 0.6.0 (2018-06-30)
+
+- Update dependencies
+- jsloader/load replaced with safeLoad ([#122](https://github.com/adzerk-oss/boot-reload/pull/122))
+- hide popup scrollbar if not needed ([#123](https://github.com/adzerk-oss/boot-reload/pull/123))
+
+**[compare](https://github.com/adzerk-oss/boot-reload/compare/0.5.2...0.6.0)**
+
 ## 0.5.2 (2017-08-17)
 
 - Fix for using with latest Closure library (which next ClojureScript uses)

@@ -7,7 +7,7 @@
 
 (require '[metosin.bat-test :refer [bat-test]])
 
-(def +version+ "0.6.0-SNAPSHOT")
+(def +version+ "0.6.0")
 
 (task-options!
   pom {:project     'adzerk/boot-reload
