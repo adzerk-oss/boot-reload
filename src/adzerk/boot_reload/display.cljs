@@ -53,7 +53,7 @@
            :pad       [:padding "12px"]
            :container [:color "black"
                        :max-height "320px"
-                       :overflow "scroll"
+                       :overflow "auto"
                        :transition (str transition-duration "ms")
                        :font-family "sans-serif"
                        :position "fixed"
