@@ -7,7 +7,8 @@
    [clojure.browser.net          :as net]
    [clojure.browser.event        :as event]
    [cljs.reader                  :as reader]
-   [goog.net.jsloader            :as jsloader])
+   [goog.net.jsloader            :as jsloader]
+   [goog.html.legacyconversions  :as legacyconversions])
   (:import
    goog.Uri))
 
@@ -16,7 +17,7 @@
   (set! (.-provide js/goog) (.-exportPath_ js/goog))
   (set! (.-CLOSURE_IMPORT_SCRIPT (.-global js/goog)) (fn [file]
                                                        (when (.inHtmlDocument_ js/goog)
-                                                         (jsloader/load file)))))
+                                                         (jsloader/safeLoad (legacyconversions/trustedResourceUrlFromString file))))))
 
 (defn resolve-url [url ws-host]
   (let [passed-uri (Uri. url)
