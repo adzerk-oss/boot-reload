@@ -1,13 +1,13 @@
 (set-env!
   :resource-paths #{"src"}
   :source-paths #{"test"}
-  :dependencies '[[org.clojure/clojure "1.8.0" :scope "provided"]
+  :dependencies '[[org.clojure/clojure "1.9.0" :scope "provided"]
                   [http-kit "2.3.0" :scope "test"]
-                  [metosin/boot-alt-test "0.3.2" :scope "test"]])
+                  [metosin/bat-test "0.4.0" :scope "test"]])
 
-(require '[metosin.boot-alt-test :refer [alt-test]])
+(require '[metosin.bat-test :refer [bat-test]])
 
-(def +version+ "0.5.2")
+(def +version+ "0.6.0-SNAPSHOT")
 
 (task-options!
   pom {:project     'adzerk/boot-reload
@@ -26,7 +26,7 @@
 
 (deftask run-tests []
   (comp
-    (alt-test)))
+    (bat-test)))
 
 (deftask dev []
   (comp
