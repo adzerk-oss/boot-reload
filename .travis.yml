@@ -8,6 +8,7 @@ install:
   - chmod +x ~/bin/boot
 jdk:
   - oraclejdk8
+  - oraclejdk9
 cache:
   directories:
   - $HOME/.m2
