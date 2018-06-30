@@ -24,7 +24,9 @@
    (jar)
    (install)))
 
-(deftask run-tests []
+(ns-unmap *ns* 'test)
+
+(deftask test []
   (comp
     (bat-test)))
 
@@ -32,12 +34,12 @@
   (comp
    (watch)
    (repl :server true)
-   (run-tests)
+   (test)
    (build)
    (target)))
 
 (deftask deploy []
   (comp
-    (run-tests)
+    (test)
     (build)
     (push :repo "clojars" :gpg-sign (not (.endsWith +version+ "-SNAPSHOT")))))
