@@ -42,4 +42,10 @@
   (comp
     (test)
     (build)
-    (push :repo "clojars" :gpg-sign (not (.endsWith +version+ "-SNAPSHOT")))))
+    (push :repo "clojars"
+          ;; Clojars needs different deploy url.
+          :repo-map {:url "https://clojars.org/repo"}
+          ;; Boot uses old pomegranate and doesn't setup checksums for gpg files
+          ;; clojars now needs.
+          ; :gpg-sign (not (.endsWith +version+ "-SNAPSHOT"))
+          )))

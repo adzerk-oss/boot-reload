@@ -2,6 +2,9 @@
 
 - Fix compatibility with ClojureScript 1.10.741 and up ([#127](https://github.com/adzerk-oss/boot-reload/pull/127))
 
+(Release isn't gpg signed as Boot doesn't setup gpg file information for Clojars
+correctly)
+
 ## 0.6.0 (2018-06-30)
 
 - Update dependencies
