@@ -48,7 +48,7 @@
   ([url] (connect url nil))
   ([url opts]
    (when (and (not (alive?))
-              (some? goog/dependencies_))
+              goog/DEPENDENCIES_ENABLED)
      (let [conn (ws/websocket-connection)]
        (patch-goog-base!)
        (reset! ws-conn conn)
