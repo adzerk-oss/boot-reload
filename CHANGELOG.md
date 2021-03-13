@@ -1,3 +1,7 @@
+## 0.6.1 (2020-03-13)
+
+- Fix compatibility with ClojureScript 1.10.741 and up ([#127](https://github.com/adzerk-oss/boot-reload/pull/127))
+
 ## 0.6.0 (2018-06-30)
 
 - Update dependencies
